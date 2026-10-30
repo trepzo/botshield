@@ -1,12 +1,467 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BotShield</title>
-<style>
-:root{color-scheme:light dark;--site-primary:#263b70;--site-on-primary:#fff;--site-secondary:#e8edfa;--site-on-secondary:#1c2d54;--site-background:light-dark(#f4f6fb,#111827);--site-on-background:light-dark(#182238,#edf2ff);--site-font-body:Inter,ui-sans-serif,system-ui,sans-serif;--site-font-heading:Inter,ui-sans-serif,system-ui,sans-serif;--site-heading-scale:1;--site-spacing-scale:1;--site-radius-scale:1;--site-decoration-opacity:1;--surface:light-dark(#fff,#1b2434);--muted:light-dark(#667085,#aab4c8);--line:light-dark(#e5e9f2,#30394b);--green:#16865a;--green-bg:light-dark(#e7f7ef,#173b30);--amber:#98630b;--amber-bg:light-dark(#fff4d9,#49391b);--red:#b54747;--red-bg:light-dark(#fff0f0,#482929)}
-*{box-sizing:border-box}body{margin:0;background:var(--site-background);color:var(--site-on-background);font-family:var(--site-font-body)}button,input{font:inherit}button{cursor:pointer}.top{height:64px;background:var(--site-primary);color:white;display:flex;align-items:center;padding:0 5vw;gap:28px}.brand{font-size:21px;font-weight:850}.nav{display:flex;gap:22px;margin-left:24px}.nav a{color:#dce5ff;text-decoration:none;font-size:14px}.nav a:first-child{color:white;font-weight:750}.topright{margin-left:auto;font-size:13px;color:#e2e9ff}.wrap{max-width:1120px;margin:32px auto;padding:0 24px}.welcome{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:22px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:800}h1{font-size:calc(30px * var(--site-heading-scale));margin:6px 0;letter-spacing:-1px}.sub{color:var(--muted);font-size:14px}.demo{font-size:12px;color:#7b5b17;background:#fff2d2;border:1px solid #f1dfb6;padding:9px 12px;border-radius:9px}.panel,.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px}.connection{padding:18px;margin-bottom:18px}.connection-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.note{font-size:11px;line-height:1.5;color:var(--muted);background:light-dark(#f6f7fa,#202838);border-radius:9px;padding:11px;margin-top:13px}.btn{border:1px solid var(--line);background:var(--surface);color:var(--site-on-background);border-radius:8px;padding:8px 11px;font-size:11px;font-weight:700}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}.stat{padding:17px 19px}.num{font-size:26px;font-weight:800}.label{font-size:12px;color:var(--muted);margin-top:3px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:18px;align-items:start}.panelhead{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.panelhead h2{font-size:17px;margin:0}.count{font-size:11px;color:var(--muted);background:var(--site-secondary);padding:5px 8px;border-radius:20px}.tabs{display:flex;gap:5px;padding:12px 16px;border-bottom:1px solid var(--line)}.tab{border:0;background:transparent;color:var(--muted);padding:8px 11px;border-radius:8px;font-size:12px;font-weight:700}.tab.active{background:var(--site-secondary);color:var(--site-on-secondary)}.search{margin:14px 16px 4px;width:calc(100% - 32px);border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--surface);color:var(--site-on-background)}.request{display:flex;align-items:center;gap:13px;padding:15px 18px;border-bottom:1px solid var(--line)}.avatar{width:50px;height:50px;flex:none;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#dce6ff,#aebde4);color:#24365f;font-weight:800;border:3px solid var(--surface)}.person{min-width:0;flex:1}.person strong{font-size:13px}.handle,.meta{font-size:11px;color:var(--muted);margin-top:4px}.pill{font-size:10px;font-weight:800;padding:5px 8px;border-radius:20px;white-space:nowrap}.likely{color:var(--green);background:var(--green-bg)}.suspicious{color:var(--amber);background:var(--amber-bg)}.actions{display:flex;gap:6px}.accept{background:var(--green-bg);color:var(--green);border-color:#bce8d0}.decline{background:var(--red-bg);color:var(--red);border-color:#f0caca}.side{padding:18px}.side h3{font-size:14px;margin:0 0 5px}.side p{font-size:12px;color:var(--muted);line-height:1.5}.setting{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}.setting span{font-size:12px;font-weight:650}.setting small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.toggle{width:36px;height:20px;border:0;border-radius:20px;background:#cbd2df;padding:2px}.toggle:after{content:'';display:block;width:16px;height:16px;background:white;border-radius:50%;transition:.15s}.toggle.on{background:#3657a1}.toggle.on:after{transform:translateX(16px)}.empty{padding:34px;text-align:center;color:var(--muted);font-size:13px}.footer{text-align:center;color:var(--muted);font-size:11px;padding:28px}.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1f2d4c;color:white;padding:11px 16px;border-radius:10px;font-size:12px;opacity:0;pointer-events:none}.toast.show{opacity:1}
-@media(max-width:760px){.top{padding:0 16px}.nav{gap:10px;margin-left:0}.topright{display:none}.wrap{padding:0 14px}.welcome{align-items:start;flex-direction:column}.stats{gap:8px}.stat{padding:13px}.num{font-size:22px}.layout{grid-template-columns:1fr}.side{order:-1}.request{flex-wrap:wrap;gap:9px;padding:13px 11px}.actions{margin-left:59px}.pill{margin-left:auto}}
-</style></head><body><header class="top"><div class="brand">⬡ BotShield</div><nav class="nav"><a href="#requests">Friends</a><a href="#settings">Filters</a><a href="#about">About</a></nav><div class="topright">Interactive preview</div></header><main class="wrap"><section class="welcome"><div><div class="eyebrow">Your friend requests</div><h1>Keep the real ones in sight.</h1><div class="sub">Review incoming requests with extra context and configurable signals.</div></div><div class="demo">DEMO MODE · Sample accounts only</div></section><section class="panel connection"><div class="connection-top"><div><h2>Roblox account connection</h2><div class="sub">Status: <strong>Not connected</strong></div></div><button class="btn" id="connect">Connect Roblox</button></div><div class="note">This preview uses sample requests only. It does not ask for passwords or session cookies, and it cannot send actions to Roblox.</div></section><section class="stats"><div class="stat"><div class="num" id="total">6</div><div class="label">Requests in this demo</div></div><div class="stat"><div class="num" id="genuine">3</div><div class="label">Likely genuine</div></div><div class="stat"><div class="num" id="flagged">3</div><div class="label">Needs a closer look</div></div></section><div class="layout"><section class="panel" id="requests"><div class="panelhead"><h2>Friend requests</h2><span class="count">Illustrative data</span></div><div class="tabs"><button class="tab active" data-tab="all">All requests</button><button class="tab" data-tab="likely">Likely genuine</button><button class="tab" data-tab="suspicious">Suspicious</button></div><input class="search" id="search" placeholder="Username here" aria-label="Username here"><div id="list"></div></section><aside class="panel side" id="settings"><h3>Detection settings</h3><p>Choose which signals contribute to the demo's risk assessment.</p><div id="settingsList"></div><div class="note">These are illustrative scoring rules, not verified bot detection. A low friend count or basic avatar does not prove an account is a bot.</div></aside></div><div class="footer" id="about">BotShield concept preview · Not affiliated with Roblox</div></main><div class="toast" id="toast" role="status"></div>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — Demo</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== Top bar ===== -->
+<header class="topnav">
+  <div class="nav-left">
+    <span class="brand">Dashboard <span class="brand-by">by you</span></span>
+    <a class="feedback-btn" href="#" id="fbOpenBtn">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Feedback</span>
+    </a>
+  </div>
+
+  <!-- Announcement pill -->
+  <div class="top-ann" id="topAnn">
+    <div class="top-ann-pill announcement">
+      <span class="ta-icon">
+        <svg class="an-ico" viewBox="0 0 24 24"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8"/></svg>
+      </span>
+      <span class="ta-title">Welcome!</span>
+      <span class="ta-msg">This is a demo dashboard.</span>
+      <button class="ta-close" id="taClose" aria-label="Dismiss">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="account">
+    <img class="avatar account-avatar" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-1A2B3C4D5E6F7G8H-Png/150/150/AvatarHeadshot/Png/noFilter" alt="">
+    <div class="account-info">
+      <span class="account-name">DemoUser</span>
+      <span class="account-user"><span class="status-dot"></span>@demouser</span>
+    </div>
+    <button class="btn btn-disconnect btn-secondary">Disconnect</button>
+  </div>
+
+  <div class="nav-divider"></div>
+  <div class="nav-user">
+    <img class="avatar nav-discord" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">
+  </div>
+  <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+
+<!-- ===== Announcement bars ===== -->
+<div class="announce-bars" id="annBars">
+  <div class="announce-bar update">
+    <span class="ab-icon">
+      <svg class="an-ico" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+    </span>
+    <div class="ab-text">
+      <span class="ab-title">Update</span>
+      <span class="ab-msg">Dark mode is now available in Settings.</span>
+      <span class="ab-by">— by you</span>
+    </div>
+    <button class="ab-close" aria-label="Close">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===== Content ===== -->
+<main class="content">
+  <div class="container-header">
+    <h1 class="friends-title">Friends</h1>
+  </div>
+
+  <ul class="nav-tabs" role="tablist">
+    <li class="rbx-tab"><button class="rbx-tab-heading active" data-tab="requests"><span class="text-lead">Requests</span></button></li>
+    <li class="rbx-tab"><button class="rbx-tab-heading" data-tab="whitelist"><span class="text-lead">Whitelist</span></button></li>
+    <li class="rbx-tab"><button class="rbx-tab-heading" data-tab="leaderboard"><span class="text-lead">Leaderboard</span></button></li>
+    <li class="rbx-tab"><button class="rbx-tab-heading" data-tab="settings"><span class="text-lead">Settings</span></button></li>
+  </ul>
+
+  <!-- ===== Requests tab ===== -->
+  <section class="tab-content" id="tab-requests">
+    <div class="requests-header">
+      <div class="friends-subtitle">
+        <h2>Incoming requests</h2>
+        <span class="icon-moreinfo" title="Requests filtered by your level">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><circle class="dot" cx="12" cy="8" r="1"/></svg>
+        </span>
+      </div>
+      <div class="requests-actions">
+        <div class="level-dd">
+          <button class="level-btn" id="levelBtn" aria-expanded="false">
+            <svg class="level-shield" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/></svg>
+            <span id="levelLabel">Level 3+</span>
+            <svg class="level-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="level-menu" id="levelMenu" hidden>
+            <div class="level-opt" data-level="1" role="option"><span class="level-opt-num">1</span><div class="level-opt-body"><div class="level-opt-title">All levels</div><div class="level-opt-desc">Show every request.</div></div><svg class="level-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+            <div class="level-opt" data-level="2" role="option"><span class="level-opt-num">2</span><div class="level-opt-body"><div class="level-opt-title">Level 2+</div><div class="level-opt-desc">Hide brand-new accounts.</div></div><svg class="level-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+            <div class="level-opt active" data-level="3" role="option" aria-selected="true"><span class="level-opt-num">3</span><div class="level-opt-body"><div class="level-opt-title">Level 3+ <span class="level-rec">Recommended</span></div><div class="level-opt-desc">Balanced filtering.</div></div><svg class="level-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+            <div class="level-opt" data-level="4" role="option"><span class="level-opt-num">4</span><div class="level-opt-body"><div class="level-opt-title">Level 4+</div><div class="level-opt-desc">Only established accounts.</div></div><svg class="level-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+          </div>
+        </div>
+        <button class="pill-btn" id="acceptAll">Accept all</button>
+        <button class="pill-btn" id="ignoreAll">Ignore all</button>
+      </div>
+    </div>
+    <div class="filter-summary" id="filterSummary">Showing requests for level 3 and above.</div>
+
+    <div class="request-grid" id="requestGrid"></div>
+
+    <div class="pager">
+      <button class="pager-btn" disabled><svg viewBox="0 0 24 24"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg></button>
+      <button class="pager-btn" disabled><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <span class="pager-info">Page <input class="pager-input" value="1" inputmode="numeric"> of 1</span>
+      <button class="pager-btn" disabled><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      <button class="pager-btn" disabled><svg viewBox="0 0 24 24"><path d="M13 7l5 5-5 5M6 7l5 5-5 5"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ===== Whitelist tab ===== -->
+  <section class="tab-content" id="tab-whitelist" hidden>
+    <div class="wl">
+      <div class="wl-lookup">
+        <div class="field-wrap">
+          <svg class="field-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input class="input-field lg" placeholder="Username or ID">
+        </div>
+        <button class="btn btn-fixed btn-primary">Look up</button>
+      </div>
+
+      <div class="wl-list" id="wlList"></div>
+    </div>
+  </section>
+
+  <!-- ===== Leaderboard tab ===== -->
+  <section class="tab-content" id="tab-leaderboard" hidden>
+    <div class="lb-online"><span class="lb-dot"></span>3 online now</div>
+    <div class="fb-filters lb-sorts">
+      <button class="fb-filter active">Requests</button>
+      <button class="fb-filter">Friends</button>
+      <button class="fb-filter">Bots</button>
+    </div>
+    <div class="lb-list" id="lbList"></div>
+  </section>
+
+  <!-- ===== Settings tab ===== -->
+  <section class="tab-content" id="tab-settings" hidden>
+    <div class="perm-group">
+      <div class="set-row">
+        <div class="perm-text"><span class="perm-name">Theme</span><span class="perm-desc">Light or dark appearance.</span></div>
+        <div class="seg">
+          <button class="seg-btn active" data-theme-set="light">Light</button>
+          <button class="seg-btn" data-theme-set="dark">Dark</button>
+        </div>
+      </div>
+      <label class="set-row">
+        <div class="perm-text"><span class="perm-name">Animations</span><span class="perm-desc">Turn off entrance animations.</span></div>
+        <input class="switch-input" type="checkbox" id="animToggle">
+        <span class="switch-ui"></span>
+      </label>
+      <label class="set-row">
+        <div class="perm-text"><span class="perm-name">Banners</span><span class="perm-desc">Show announcement banners.</span></div>
+        <input class="switch-input" type="checkbox" id="bannerToggle" checked>
+        <span class="switch-ui"></span>
+      </label>
+      <a class="set-link" href="#">
+        <span class="set-link-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="perm-text"><span class="perm-name">Send feedback</span><span class="perm-desc">Report a bug or request a feature.</span></span>
+        <svg class="set-link-arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+      <a class="set-link" href="tos.html">
+        <span class="set-link-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+        <span class="perm-text"><span class="perm-name">Terms of Service</span><span class="perm-desc">Read the rules.</span></span>
+        <svg class="set-link-arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+    </div>
+  </section>
+</main>
+
+<!-- ===== Modal ===== -->
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="modal">
+    <button class="modal-close" id="modalClose" aria-label="Close">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast" hidden></div>
+
 <script>
-const requests=[{id:1,name:'CloudyBuilder',handle:'@cloudy_builds',initials:'CB',friends:84,followers:126,age:'2 years',items:'Mixed avatar items'},{id:2,name:'xX_guest_48391',handle:'@guest48391',initials:'XG',friends:0,followers:1,age:'New',items:'Very similar outfit pattern'},{id:3,name:'MaplePlays',handle:'@mapleplays',initials:'MP',friends:212,followers:340,age:'4 years',items:'Several catalog items'},{id:4,name:'RbxUser_72910',handle:'@rbx72910',initials:'R7',friends:1,followers:0,age:'New',items:'Repeated avatar pattern'},{id:5,name:'PixelPanda',handle:'@pixel_panda',initials:'PP',friends:43,followers:61,age:'1 year',items:'Classic + catalog items'},{id:6,name:'Player_000582',handle:'@player000582',initials:'P5',friends:2,followers:3,age:'New',items:'Limited public info'}];
-const settings=[['avatar','Avatar similarity','Repeated outfit patterns'],['friends','Friend count','Very low friend counts'],['followers','Follower count','Very low follower counts'],['age','Account age','New account signal'],['items','Avatar items','Catalog item information']];let enabled={avatar:true,friends:true,followers:true,age:true,items:true},activeTab='all';
-function score(r){let s=0;if(enabled.avatar&&/similar|Repeated/.test(r.items))s+=35;if(enabled.friends&&r.friends<3)s+=20;if(enabled.followers&&r.followers<5)s+=15;if(enabled.age&&r.age==='New')s+=15;if(enabled.items&&r.items==='Limited public info')s+=10;return Math.min(100,s)}function category(r){return score(r)>=50?'suspicious':'likely'}function toast(s){const el=document.getElementById('toast');el.textContent=s;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}function renderSettings(){document.getElementById('settingsList').innerHTML=settings.map(([k,n,d])=>`<div class="setting"><div><span>${n}</span><small>${d}</small></div><button class="toggle ${enabled[k]?'on':''}" data-setting="${k}" aria-label="Toggle ${n}" aria-pressed="${enabled[k]}"></button></div>`).join('')}function render(){const q=document.getElementById('search').value.toLowerCase();const shown=requests.filter(r=>r.name.toLowerCase().includes(q)&&(activeTab==='all'||category(r)===activeTab));document.getElementById('total').textContent=requests.length;document.getElementById('genuine').textContent=requests.filter(r=>category(r)==='likely').length;document.getElementById('flagged').textContent=requests.filter(r=>category(r)==='suspicious').length;document.getElementById('list').innerHTML=shown.length?shown.map(r=>{const c=category(r);return `<div class="request"><div class="avatar">${r.initials}</div><div class="person"><strong>${r.name}</strong><div class="handle">${r.handle}</div><div class="meta">${r.friends} friends · ${r.followers} followers · ${r.age} · ${r.items}</div></div><span class="pill ${c}">${c==='likely'?'Likely genuine':'Suspicious'}</span><div class="actions"><button class="btn accept" data-action="accept" data-id="${r.id}">✓ Accept</button><button class="btn decline" data-action="decline" data-id="${r.id}">✕ Decline</button></div></div>`}).join(''):'<div class="empty">No requests in this view.</div>'}document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tab){activeTab=b.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));render()}if(b.dataset.setting){enabled[b.dataset.setting]=!enabled[b.dataset.setting];renderSettings();render()}if(b.dataset.action){const i=requests.findIndex(r=>r.id===Number(b.dataset.id));if(i>=0){const [r]=requests.splice(i,1);toast(`${r.name}: ${b.dataset.action} in this demo only. No Roblox action was sent.`);render()}}});document.getElementById('search').addEventListener('input',render);document.getElementById('connect').addEventListener('click',()=>toast('Live Roblox connection is not available in this preview.'));renderSettings();render();
-</script></body></html>
+/* ===== Sample data ===== */
+const requests = [
+  { id: 1, name: "Builder", user: "builder_01", level: 4 },
+  { id: 2, name: "Scripter", user: "scripter_dev", level: 3 },
+  { id: 3, name: "Artist", user: "pixel_art", level: 3 },
+  { id: 4, name: "Newbie", user: "newbie_99", level: 1 },
+];
+
+const whitelist = [
+  { id: "1001", name: "DemoUser", user: "demouser", status: "active", ip: "192.0.2.10", owner: true },
+  { id: "1002", name: "Builder", user: "builder_01", status: "permanent", ip: "192.0.2.11", admin: true },
+  { id: "1003", name: "Scripter", user: "scripter_dev", status: "expired", ip: "192.0.2.12" },
+];
+
+const leaderboard = [
+  { pos: 1, name: "Builder", user: "builder_01", online: true, stats: [120, 80, 45, 12], you: false },
+  { pos: 2, name: "Scripter", user: "scripter_dev", online: true, stats: [98, 60, 30, 9], you: false },
+  { pos: 3, name: "DemoUser", user: "demouser", online: false, stats: [75, 40, 20, 7], you: true },
+  { pos: 4, name: "Artist", user: "pixel_art", online: true, stats: [60, 35, 18, 5], you: false },
+];
+
+/* ===== Helpers ===== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+function toast(msg, bad = false) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.toggle("bad", bad);
+  t.hidden = false;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => (t.hidden = true), 2500);
+}
+
+function avatar(seed) {
+  return `https://tr.rbxcdn.com/30DAY-AvatarHeadshot-${seed}-Png/150/150/AvatarHeadshot/Png/noFilter`;
+}
+
+/* ===== Tabs ===== */
+$$(".rbx-tab-heading").forEach(btn => {
+  btn.addEventListener("click", () => {
+    $$(".rbx-tab-heading").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    $$(".tab-content").forEach(c => (c.hidden = true));
+    $(`#tab-${btn.dataset.tab}`).hidden = false;
+  });
+});
+
+/* ===== Requests ===== */
+function renderRequests(level = 3) {
+  const visible = requests.filter(r => r.level >= level);
+  $("#requestGrid").innerHTML = visible.map(r => `
+    <div class="request-card" data-id="${r.id}">
+      <div class="rc-top">
+        <img class="rc-avatar" src="${avatar(r.id)}" alt="">
+        <div class="rc-names">
+          <span class="rc-display">${r.name}</span>
+          <span class="rc-user">@${r.user}</span>
+        </div>
+      </div>
+      <div class="rc-actions">
+        <button class="rc-btn ignore" data-act="ignore">Ignore</button>
+        <button class="rc-btn accept" data-act="accept">Accept</button>
+      </div>
+    </div>
+  `).join("");
+  $("#filterSummary").textContent = visible.length
+    ? `Showing ${visible.length} request${visible.length > 1 ? "s" : ""} for level ${level} and above.`
+    : `No requests match level ${level} and above.`;
+}
+
+$("#requestGrid").addEventListener("click", e => {
+  const btn = e.target.closest(".rc-btn");
+  if (!btn) return;
+  const card = btn.closest(".request-card");
+  const id = Number(card.dataset.id);
+  const act = btn.dataset.act;
+  btn.disabled = true;
+  setTimeout(() => {
+    const idx = requests.findIndex(r => r.id === id);
+    if (idx > -1) requests.splice(idx, 1);
+    card.remove();
+    toast(act === "accept" ? "Request accepted." : "Request ignored.");
+    if (!$("#requestGrid").children.length) renderRequests(currentLevel);
+  }, 250);
+});
+
+$("#acceptAll").addEventListener("click", () => {
+  $$("#requestGrid .request-card").forEach(c => c.remove());
+  requests.length = 0;
+  toast("All requests accepted.");
+  renderRequests(currentLevel);
+});
+$("#ignoreAll").addEventListener("click", () => {
+  $$("#requestGrid .request-card").forEach(c => c.remove());
+  requests.length = 0;
+  toast("All requests ignored.");
+  renderRequests(currentLevel);
+});
+
+/* ===== Level dropdown ===== */
+let currentLevel = 3;
+const levelBtn = $("#levelBtn");
+const levelMenu = $("#levelMenu");
+levelBtn.addEventListener("click", () => {
+  const open = levelMenu.hidden;
+  levelMenu.hidden = !open;
+  levelBtn.setAttribute("aria-expanded", String(open));
+});
+document.addEventListener("click", e => {
+  if (!e.target.closest(".level-dd")) {
+    levelMenu.hidden = true;
+    levelBtn.setAttribute("aria-expanded", "false");
+  }
+});
+$$(".level-opt").forEach(opt => {
+  opt.addEventListener("click", () => {
+    currentLevel = Number(opt.dataset.level);
+    $$(".level-opt").forEach(o => {
+      o.classList.toggle("active", o === opt);
+      o.setAttribute("aria-selected", String(o === opt));
+    });
+    $("#levelLabel").textContent = opt.querySelector(".level-opt-title").textContent.trim().split(" ")[0] + " " + (currentLevel > 1 ? "+" : "");
+    levelMenu.hidden = true;
+    levelBtn.setAttribute("aria-expanded", "false");
+    renderRequests(currentLevel);
+  });
+});
+
+/* ===== Whitelist ===== */
+function renderWhitelist() {
+  $("#wlList").innerHTML = whitelist.map(w => `
+    <div class="wl-row ${w.owner ? "is-owner" : ""}" data-id="${w.id}">
+      <img class="avatar wl-avatar" src="${avatar(w.id)}" alt="">
+      <div class="wl-who">
+        <div class="wl-name">
+          <span class="wl-name-text">${w.name}</span>
+          ${w.owner ? `<span class="owner-badge"><svg viewBox="0 0 24 24"><path d="M3 8l4 4 5-7 5 7 4-4v10H3z"/></svg>Owner</span>` : ""}
+          ${w.admin ? `<span class="admin-badge"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/></svg>Admin</span>` : ""}
+        </div>
+        <div class="wl-meta">
+          <span>@${w.user}</span><span class="sep">·</span>
+          <span class="ip-reveal" title="Click to reveal">
+            <span class="ip-value">${w.ip}</span>
+            <span class="ip-cover">Show IP</span>
+          </span>
+        </div>
+      </div>
+      <span class="pill ${w.status}">${w.status}</span>
+      <button class="btn btn-manage btn-secondary" data-manage="${w.id}">Manage</button>
+    </div>
+  `).join("");
+}
+
+$("#wlList").addEventListener("click", e => {
+  const ip = e.target.closest(".ip-reveal");
+  if (ip) { ip.classList.add("revealed"); return; }
+  const mg = e.target.closest("[data-manage]");
+  if (mg) openManage(mg.dataset.manage);
+});
+
+function openManage(id) {
+  const w = whitelist.find(x => x.id === id);
+  if (!w) return;
+  $("#modalBody").innerHTML = `
+    <div class="manage-head">
+      <img class="avatar manage-avatar" src="${avatar(w.id)}" alt="">
+      <div class="manage-who">
+        <div class="manage-name">${w.name}</div>
+        <div class="manage-sub">@${w.user}</div>
+      </div>
+    </div>
+    <div class="manage-section">
+      <span class="manage-label">Status</span>
+      <div class="status-line"><span class="pill ${w.status}">${w.status}</span></div>
+    </div>
+    ${w.owner ? `<div class="manage-section"><div class="owner-note"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/></svg>This is the owner account and cannot be removed.</div></div>` : `
+    <div class="manage-section">
+      <span class="manage-label">Duration</span>
+      <div class="chips">
+        <button class="chip">1 day</button>
+        <button class="chip">7 days</button>
+        <button class="chip selected">30 days</button>
+        <button class="chip">Permanent</button>
+      </div>
+      <div class="duration-preview">Expires in 30 days.</div>
+    </div>
+    <div class="manage-actions">
+      <button class="btn btn-secondary" id="mCancel">Cancel</button>
+      <button class="btn btn-primary" id="mSave">Save</button>
+    </div>`}
+  `;
+  $("#modal").hidden = false;
+  $("#mCancel")?.addEventListener("click", () => ($("#modal").hidden = true));
+  $("#mSave")?.addEventListener("click", () => { $("#modal").hidden = true; toast("Saved."); });
+}
+
+/* ===== Leaderboard ===== */
+function renderLeaderboard() {
+  $("#lbList").innerHTML = leaderboard.map(l => `
+    <div class="lb-row ${l.you ? "is-you" : ""}">
+      <div class="lb-pos">${l.pos <= 3
+        ? `<svg class="lb-medal-svg" viewBox="0 0 24 24" style="color:${["#f5aa00","#bcbec8","#cd7f32"][l.pos-1]}"><circle cx="12" cy="9" r="6" fill="currentColor"/><path d="M8 14l-2 8 6-3 6 3-2-8" fill="currentColor"/></svg>`
+        : `<span class="lb-rank">${l.pos}</span>`}</div>
+      <div class="lb-avatar-wrap">
+        <img class="avatar lb-avatar" src="${avatar(l.pos)}" alt="">
+        <span class="lb-status ${l.online ? "on" : ""}"></span>
+      </div>
+      <div class="lb-who">
+        <div class="wl-name"><span class="wl-name-text">${l.name}</span>${l.you ? `<span class="lb-you">You</span>` : ""}</div>
+        <div class="lb-sub">@${l.user} ${l.online ? `<span class="lb-online-text">· online</span>` : ""}</div>
+      </div>
+      <div class="lb-stats">
+        ${l.stats.map((s, i) => `<div class="lb-stat ${i === 0 ? "lb-hl" : ""}"><b>${s}</b><span>${["Req","Fr","Bots","X"][i]}</span></div>`).join("")}
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ===== Theme ===== */
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  $$("[data-theme-set]").forEach(b => b.classList.toggle("active", b.dataset.themeSet === t));
+  localStorage.setItem("theme", t);
+}
+$("#themeBtn").addEventListener("click", () => {
+  setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+});
+$$("[data-theme-set]").forEach(b => b.addEventListener("click", () => setTheme(b.dataset.themeSet)));
+
+/* ===== Settings toggles ===== */
+$("#animToggle").addEventListener("change", e => {
+  document.documentElement.classList.toggle("no-anim", e.target.checked);
+});
+$("#bannerToggle").addEventListener("change", e => {
+  document.documentElement.classList.toggle("hide-banners", !e.target.checked);
+});
+
+/* ===== Announcement pill close ===== */
+$("#taClose").addEventListener("click", () => ($("#topAnn").hidden = true));
+$$(".ab-close").forEach(b => b.addEventListener("click", () => b.closest(".announce-bar").remove()));
+
+/* ===== Feedback button ===== */
+$("#fbOpenBtn").addEventListener("click", e => {
+  e.preventDefault();
+  $("#modalBody").innerHTML = `
+    <div class="fb-head"><h2 style="font-size:20px;font-weight:800">Send feedback</h2></div>
+    <div class="fb-field">
+      <textarea class="input-field textarea" placeholder="What's on your mind?" style="width:100%"></textarea>
+    </div>
+    <div class="manage-actions">
+      <button class="btn btn-secondary" id="fbCancel">Cancel</button>
+      <button class="btn btn-primary" id="fbSend">Send</button>
+    </div>`;
+  $("#modal").hidden = false;
+  $("#fbCancel").addEventListener("click", () => ($("#modal").hidden = true));
+  $("#fbSend").addEventListener("click", () => { $("#modal").hidden = true; toast("Feedback sent. Thank you!"); });
+});
+
+/* ===== Modal close ===== */
+$("#modalClose").addEventListener("click", () => ($("#modal").hidden = true));
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") $("#modal").hidden = true; });
+
+/* ===== Init ===== */
+setTheme(localStorage.getItem("theme") || "light");
+renderRequests(currentLevel);
+renderWhitelist();
+renderLeaderboard();
+</script>
+</body>
+</html>
