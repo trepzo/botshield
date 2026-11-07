@@ -40,6 +40,8 @@ a{color:inherit;text-decoration:none}
 .requests-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0 12px; flex-wrap: wrap; margin-bottom: 12px;}
 .friends-subtitle h2 { font-size: 16px; font-weight: 700; margin: 0; }
 .requests-actions { display: flex; align-items: center; gap: 8px; }
+.pill-btn { height: 26px; padding: 0 11px; border-radius: 8px; background: var(--action-standard-bg); color: var(--content-emphasis); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.pill-btn:hover:not(:disabled) { filter: brightness(1.1); }
 
 .level-dd { position: relative; }
 .level-btn {
@@ -176,10 +178,11 @@ let allRequests = [];
 let currentFilter = 'all';
 
 // ==========================================
-// PUT YOUR BOT ITEM IDs OR NAMES HERE
+// PUT YOUR BOT ITEM IDs HERE
 // ==========================================
-const KNOWN_BOT_ITEM_IDS = ["1772336109"]; 
-const KNOWN_BOT_ITEM_NAMES = ["down to earth hair", "bacon hair", "default"]; 
+const KNOWN_BOT_ITEMS = [
+  "1772336109" // Added as a string
+]; 
 
 async function roblox(path) {
   const res = await fetch(`${PROXY}?path=${encodeURIComponent(path)}`, {
@@ -189,19 +192,21 @@ async function roblox(path) {
   return res.json();
 }
 
-// Fetch the names of the items to see if they match the blocklist
+// Fetch the names of the items they are wearing using the Asset Delivery API
 async function checkItemNames(assetIds) {
     for (const id of assetIds) {
-        if (KNOWN_BOT_ITEM_IDS.includes(String(id))) return true;
+        // First, check if the exact ID matches our list
+        if (KNOWN_BOT_ITEMS.includes(String(id))) return true;
 
+        // If not, fetch the name to see if it matches a known bundle item
         try {
             const res = await fetch(`https://assetdelivery.roblox.com/v1/asset?id=${id}`);
             const text = await res.text();
             const match = text.match(/<string name="Name">([^<]+)<\/string>/);
             if (match) {
                 const itemName = match[1].toLowerCase();
-                // Check if the item name contains any of the blocked words
-                if (KNOWN_BOT_ITEM_NAMES.some(botName => itemName.includes(botName))) {
+                // If the name has "default" or "bacon" or "noob" in it, it's a bot item
+                if (itemName.includes("bacon") || itemName.includes("default") || itemName.includes("noob")) {
                     return true;
                 }
             }
@@ -247,10 +252,7 @@ document.getElementById('connectBtn').onclick = async () => {
       // Check if they are wearing the bot items
       const hasBotItem = await checkItemNames(userData.assetIds);
       
-      // If they have a bot item, they ARE a bot. (No age check needed here anymore)
-      // If they have 0 items, they are a bot.
-      // If they are brand new (<3 days) and have very few items, they are a bot.
-      userData.isBot = hasBotItem || (userData.assetIds.length === 0) || (userData.age < 3 && userData.assetIds.length < 3);
+      userData.isBot = hasBotItem || (userData.assetIds.length === 0) || (userData.age < 7 && userData.assetIds.length < 3);
       
       allRequests.push(userData);
     }
