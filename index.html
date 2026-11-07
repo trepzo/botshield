@@ -40,8 +40,6 @@ a{color:inherit;text-decoration:none}
 .requests-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0 12px; flex-wrap: wrap; margin-bottom: 12px;}
 .friends-subtitle h2 { font-size: 16px; font-weight: 700; margin: 0; }
 .requests-actions { display: flex; align-items: center; gap: 8px; }
-.pill-btn { height: 26px; padding: 0 11px; border-radius: 8px; background: var(--action-standard-bg); color: var(--content-emphasis); font-size: 14px; font-weight: 500; white-space: nowrap; }
-.pill-btn:hover:not(:disabled) { filter: brightness(1.1); }
 
 .level-dd { position: relative; }
 .level-btn {
@@ -178,13 +176,10 @@ let allRequests = [];
 let currentFilter = 'all';
 
 // ==========================================
-// KNOWN BOT WORDS
+// PUT YOUR BOT ITEM IDs OR NAMES HERE
 // ==========================================
-const BOT_WORDS = [
-  "down to earth hair", 
-  "bacon",
-  "default"
-]; 
+const KNOWN_BOT_ITEM_IDS = ["1772336109"]; 
+const KNOWN_BOT_ITEM_NAMES = ["down to earth hair", "bacon hair", "default"]; 
 
 async function roblox(path) {
   const res = await fetch(`${PROXY}?path=${encodeURIComponent(path)}`, {
@@ -194,17 +189,19 @@ async function roblox(path) {
   return res.json();
 }
 
-// Fetch the names of the items using the Asset Delivery API
-async function hasBotItem(assetIds) {
+// Fetch the names of the items to see if they match the blocklist
+async function checkItemNames(assetIds) {
     for (const id of assetIds) {
+        if (KNOWN_BOT_ITEM_IDS.includes(String(id))) return true;
+
         try {
             const res = await fetch(`https://assetdelivery.roblox.com/v1/asset?id=${id}`);
             const text = await res.text();
             const match = text.match(/<string name="Name">([^<]+)<\/string>/);
             if (match) {
                 const itemName = match[1].toLowerCase();
-                // Check if the name includes any of our bot words
-                if (BOT_WORDS.some(word => itemName.includes(word))) {
+                // Check if the item name contains any of the blocked words
+                if (KNOWN_BOT_ITEM_NAMES.some(botName => itemName.includes(botName))) {
                     return true;
                 }
             }
@@ -247,10 +244,13 @@ document.getElementById('connectBtn').onclick = async () => {
         } catch (e) {}
       }
 
-      // Check if they are wearing any bot items
-      const isBotItemFound = await hasBotItem(userData.assetIds);
+      // Check if they are wearing the bot items
+      const hasBotItem = await checkItemNames(userData.assetIds);
       
-      userData.isBot = isBotItemFound || (userData.assetIds.length === 0) || (userData.age < 7 && userData.assetIds.length < 3);
+      // If they have a bot item, they ARE a bot. (No age check needed here anymore)
+      // If they have 0 items, they are a bot.
+      // If they are brand new (<3 days) and have very few items, they are a bot.
+      userData.isBot = hasBotItem || (userData.assetIds.length === 0) || (userData.age < 3 && userData.assetIds.length < 3);
       
       allRequests.push(userData);
     }
@@ -279,4 +279,66 @@ function renderGrid() {
   for (const user of filteredList) {
     const card = document.createElement('div');
     card.className = 'request-card';
-    const final
+    const finalAvatarUrl = user.avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.id}&width=150&height=150&format=png`;
+    
+    let infoText = `${user.assetIds.length} item(s) worn · ${user.age} days old`;
+    if (user.isBot) infoText = `Likely Bot · ${user.assetIds.length} items`;
+
+    card.innerHTML = `
+      <a href="https://www.roblox.com/users/${user.id}/profile" target="_blank" class="rc-top">
+        <img class="rc-avatar" src="${finalAvatarUrl}" alt="Avatar">
+        <div class="rc-names">
+          <span class="rc-display">${user.displayName}</span>
+          <span class="rc-user">@${user.username}</span>
+          <div class="rc-wearing ${user.isBot ? 'bot' : ''}">
+            ${infoText}
+          </div>
+        </div>
+      </a>
+      <div class="rc-actions">
+        <button class="rc-btn ignore">Ignore</button>
+        <button class="rc-btn accept">Accept</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+const filterBtn = document.getElementById('filterBtn');
+const filterMenu = document.getElementById('filterMenu');
+
+filterBtn.onclick = () => {
+  const isHidden = filterMenu.hidden;
+  filterMenu.hidden = !isHidden;
+  filterBtn.setAttribute('aria-expanded', isHidden);
+};
+
+document.querySelectorAll('.level-opt').forEach(opt => {
+  opt.onclick = () => {
+    currentFilter = opt.dataset.filter;
+    
+    filterBtn.innerHTML = `
+      <svg class="level-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      Filter: ${opt.querySelector('.level-opt-title').textContent}
+      <svg class="level-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+    `;
+
+    document.querySelectorAll('.level-opt').forEach(o => o.setAttribute('aria-selected', 'false'));
+    opt.setAttribute('aria-selected', 'true');
+    
+    filterMenu.hidden = true;
+    filterBtn.setAttribute('aria-expanded', 'false');
+    
+    renderGrid(); 
+  };
+});
+
+document.addEventListener('click', (e) => {
+  if (!filterBtn.contains(e.target) && !filterMenu.contains(e.target)) {
+    filterMenu.hidden = true;
+    filterBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+</script>
+</body>
+</html>
