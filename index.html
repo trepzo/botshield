@@ -45,9 +45,9 @@ a{color:inherit;text-decoration:none}
 }
 .rc-top { display: flex; align-items: flex-start; gap: 12px; min-width: 0; color: inherit; }
 
-/* Updated to a rectangle for the full body render */
+/* Back to the Circular Headshot */
 .rc-avatar {
-  width: 100px; height: 140px; flex-shrink: 0; border-radius: 8px;
+  width: 96px; height: 96px; flex-shrink: 0; border-radius: 50%;
   background: var(--action-standard-bg); object-fit: cover;
 }
 
@@ -122,6 +122,7 @@ async function render(list) {
     
     let username = 'Unknown';
     let displayName = 'Unknown';
+    let assetCount = 0;
     let accountAgeDays = 999;
     let finalAvatarUrl = '';
 
@@ -134,9 +135,15 @@ async function render(list) {
         accountAgeDays = Math.floor((new Date() - created) / (1000 * 60 * 60 * 24));
       } catch (e) {}
 
+      // Count the items they are wearing
       try {
-        // Get the FULL BODY 3D render instead of just the head
-        const thumbData = await roblox(`thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=352x352&format=Png&isCircular=false`);
+        const av = await roblox(`avatar.roblox.com/v1/users/${userId}/currently-wearing`);
+        assetCount = (av.assets || []).length; 
+      } catch (e) {}
+
+      // Fetch the circular headshot
+      try {
+        const thumbData = await roblox(`thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
         if (thumbData.data?.[0]?.imageUrl) finalAvatarUrl = thumbData.data[0].imageUrl;
       } catch (e) {}
     }
@@ -145,11 +152,11 @@ async function render(list) {
     card.className = 'request-card';
     if (!finalAvatarUrl) finalAvatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
     
-    // If the account is less than 30 days old, it's almost certainly a bot
-    const isBot = accountAgeDays < 30;
+    // Bot logic: If they have very few items AND are a new account
+    const isBot = (assetCount < 3 && accountAgeDays < 30);
     
-    let infoText = `${accountAgeDays} days old`;
-    if (isBot) infoText = `Likely Bot · Created ${accountAgeDays} days ago`;
+    let infoText = `${assetCount} item(s) worn · ${accountAgeDays} days old`;
+    if (isBot) infoText = `Likely Bot · ${assetCount} items · ${accountAgeDays} days old`;
 
     card.innerHTML = `
       <a href="https://www.roblox.com/users/${userId}/profile" target="_blank" class="rc-top">
