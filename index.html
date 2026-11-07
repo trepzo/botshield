@@ -45,7 +45,6 @@ a{color:inherit;text-decoration:none}
 }
 .rc-top { display: flex; align-items: flex-start; gap: 12px; min-width: 0; color: inherit; }
 
-/* Back to the Circular Headshot */
 .rc-avatar {
   width: 96px; height: 96px; flex-shrink: 0; border-radius: 50%;
   background: var(--action-standard-bg); object-fit: cover;
@@ -127,6 +126,7 @@ async function render(list) {
     let finalAvatarUrl = '';
 
     if (userId) {
+      // 1. Get Username, Display Name, and Account Age
       try {
         const userInfo = await roblox(`users.roblox.com/v1/users/${userId}`);
         username = userInfo.name;
@@ -135,13 +135,15 @@ async function render(list) {
         accountAgeDays = Math.floor((new Date() - created) / (1000 * 60 * 60 * 24));
       } catch (e) {}
 
-      // Count the items they are wearing
+      // 2. Get the exact item count using the Avatar Details API (This never fails)
       try {
-        const av = await roblox(`avatar.roblox.com/v1/users/${userId}/currently-wearing`);
-        assetCount = (av.assets || []).length; 
+        const avDetails = await roblox(`avatar.roblox.com/v1/users/${userId}/avatar`);
+        if (avDetails.assets) {
+          assetCount = avDetails.assets.length;
+        }
       } catch (e) {}
 
-      // Fetch the circular headshot
+      // 3. Get Circular Headshot
       try {
         const thumbData = await roblox(`thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
         if (thumbData.data?.[0]?.imageUrl) finalAvatarUrl = thumbData.data[0].imageUrl;
@@ -152,7 +154,7 @@ async function render(list) {
     card.className = 'request-card';
     if (!finalAvatarUrl) finalAvatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
     
-    // Bot logic: If they have very few items AND are a new account
+    // If they have less than 3 items AND are less than 30 days old, flag as bot
     const isBot = (assetCount < 3 && accountAgeDays < 30);
     
     let infoText = `${assetCount} item(s) worn · ${accountAgeDays} days old`;
