@@ -1,483 +1,134 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BotShield</title>
+<title>Friend Requests</title>
 <style>
-:root {
-  color-scheme: dark;
-  font-family: Inter, Arial, sans-serif;
-  --bg: #111827;
-  --panel: #1b2434;
-  --line: #30394b;
-  --text: #edf2ff;
-  --muted: #aab4c8;
-  --blue: #263b70;
-  --green: #16865a;
-  --red: #b54747;
+:root, :root[data-theme="light"] {
+  --surface-0:#ffffff; --surface-100:#f7f7f8;
+  --content-emphasis:#202227; --content-default:#494d5a; --content-muted:#6a6f81;
+  --stroke-default:rgba(27,37,75,.12); --action-standard-bg:rgba(27,37,75,.12);
+  --action-emphasis-bg:#335fff;
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
+:root[data-theme="dark"] {
+  --surface-0:#121215; --surface-100:#272930;
+  --content-emphasis:#f7f7f8; --content-default:#d5d7dd; --content-muted:#bcbec8;
+  --stroke-default:rgba(208,217,251,.12); --action-standard-bg:rgba(208,217,251,.12);
+  --action-emphasis-bg:#335fff;
 }
-button, input { font: inherit; }
-button { cursor: pointer; }
-.top {
-  min-height: 64px;
-  background: var(--blue);
-  display: flex;
-  align-items: center;
-  padding: 0 5%;
-  gap: 28px;
-}
-.brand { font-size: 21px; font-weight: 850; }
-.nav { display: flex; gap: 22px; }
-.nav a {
-  color: #dce5ff;
-  text-decoration: none;
-  font-size: 14px;
-}
-.topright { margin-left: auto; font-size: 13px; }
-.wrap { max-width: 1120px; margin: 32px auto; padding: 0 24px; }
-.welcome {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-  gap: 20px;
-  margin-bottom: 22px;
-}
-.eyebrow {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--muted);
-}
-h1 { font-size: 30px; margin: 6px 0; }
-.sub { color: var(--muted); font-size: 14px; }
-.demo {
-  font-size: 12px;
-  color: #f4d58b;
-  background: #49391b;
-  padding: 9px 12px;
-  border-radius: 9px;
-}
-.panel, .stat {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-}
-.connection { padding: 18px; margin-bottom: 18px; }
-.connection-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.note {
-  font-size: 11px;
-  line-height: 1.5;
-  color: var(--muted);
-  background: #202838;
-  border-radius: 9px;
-  padding: 11px;
-  margin-top: 13px;
-}
-.btn {
-  border: 1px solid var(--line);
-  background: var(--panel);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 8px 11px;
-  font-size: 11px;
-  font-weight: 700;
-}
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 22px;
-}
-.stat { padding: 17px 19px; }
-.num { font-size: 26px; font-weight: 800; }
-.label { font-size: 12px; color: var(--muted); }
-.layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 18px;
-  align-items: start;
-}
-.panelhead {
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  justify-content: space-between;
-}
-.panelhead h2 { font-size: 17px; margin: 0; }
-.count {
-  font-size: 11px;
-  color: var(--muted);
-  background: #263553;
-  padding: 5px 8px;
-  border-radius: 20px;
-}
-.tabs {
-  display: flex;
-  gap: 5px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--line);
-}
-.tab {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  padding: 8px 11px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-}
-.tab.active { background: #263553; color: white; }
-.search {
-  margin: 14px 16px 4px;
-  width: calc(100% - 32px);
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  padding: 10px 12px;
-  background: var(--panel);
-  color: var(--text);
-}
-.request {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 15px 18px;
-  border-bottom: 1px solid var(--line);
-}
-.avatar {
-  width: 50px;
-  height: 50px;
-  flex: none;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(145deg,#dce6ff,#aebde4);
-  color: #24365f;
-  font-weight: 800;
-}
-.person { min-width: 0; flex: 1; }
-.person strong { font-size: 13px; }
-.handle, .meta {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-.pill {
-  font-size: 10px;
-  font-weight: 800;
-  padding: 5px 8px;
-  border-radius: 20px;
-  white-space: nowrap;
-}
-.likely { color: #55d69c; background: #173b30; }
-.suspicious { color: #f4c66b; background: #49391b; }
-.actions { display: flex; gap: 6px; }
-.accept { background: #173b30; color: #55d69c; }
-.decline { background: #482929; color: #ffaaaa; }
-.side { padding: 18px; }
-.side h3 { font-size: 14px; margin: 0 0 5px; }
-.side p { font-size: 12px; color: var(--muted); line-height: 1.5; }
-.setting {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-}
-.setting span { font-size: 12px; font-weight: 650; }
-.setting small {
-  display: block;
-  color: var(--muted);
-  font-size: 10px;
-  margin-top: 3px;
-}
-.toggle {
-  width: 36px;
-  height: 20px;
-  border: 0;
-  border-radius: 20px;
-  background: #687386;
-  padding: 2px;
-}
-.toggle:after {
-  content: '';
-  display: block;
-  width: 16px;
-  height: 16px;
-  background: white;
-  border-radius: 50%;
-  transition: .15s;
-}
-.toggle.on { background: #3657a1; }
-.toggle.on:after { transform: translateX(16px); }
-.empty { padding: 34px; text-align: center; color: var(--muted); }
-.footer { text-align: center; color: var(--muted); font-size: 11px; padding: 28px; }
-.toast {
-  position: fixed;
-  bottom: 22px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1f2d4c;
-  color: white;
-  padding: 11px 16px;
-  border-radius: 10px;
-  font-size: 12px;
-  opacity: 0;
-}
-.toast.show { opacity: 1; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Builder Sans",Helvetica,Arial,sans-serif;font-size:12px;
+  background:var(--surface-0);color:var(--content-emphasis);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
-@media(max-width:760px) {
-  .top { padding: 0 16px; }
-  .nav { gap: 10px; }
-  .topright { display: none; }
-  .wrap { padding: 0 14px; }
-  .welcome { align-items: start; flex-direction: column; }
-  .layout { grid-template-columns: 1fr; }
-  .request { flex-wrap: wrap; }
-  .actions { margin-left: 59px; }
-}
+.topnav{height:44px;background:var(--surface-100);border-bottom:1px solid var(--stroke-default);
+  display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:12px}
+.brand{font-size:18px;font-weight:800;flex-shrink:0}
+.cookie-form{flex:1;display:flex;gap:6px;max-width:520px;margin-left:auto}
+.input-field{flex:1;height:28px;padding:0 10px;border:1px solid var(--stroke-default);
+  border-radius:6px;background:var(--surface-0);color:var(--content-emphasis);font-size:13px;outline:none}
+.input-field:focus{border-color:var(--content-emphasis)}
+.btn-connect{height:28px;padding:0 14px;border-radius:6px;font-size:13px;
+  background:var(--action-emphasis-bg);color:#fff;font-weight:600}
+
+.content{max-width:970px;margin:0 auto;padding:24px 16px}
+.friends-title{font-size:24px;font-weight:800;padding:5px 0;margin-bottom:8px}
+.status{margin-bottom:12px;font-size:13px;color:var(--content-muted)}
+
+.request-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.request-card{display:flex;flex-direction:column;padding:12px;background:var(--surface-100)}
+.rc-top{display:flex;align-items:flex-start;gap:12px;min-width:0}
+.rc-avatar{width:96px;height:96px;flex-shrink:0;border-radius:50%;
+  background:var(--action-standard-bg);object-fit:cover}
+.rc-names{min-width:0;padding-top:6px}
+.rc-display{display:block;font-size:16px;font-weight:500;line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-user{display:block;font-size:12px;line-height:1.6;color:var(--content-default);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-wearing{margin-top:6px;font-size:11px;color:var(--content-muted)}
+.rc-actions{display:flex;gap:12px;margin-top:14px}
+.rc-btn{flex:1;height:35px;border-radius:6px;font-size:16px;font-weight:500}
+.rc-btn.ignore{background:transparent;color:var(--content-muted);
+  box-shadow:inset 0 0 0 1px var(--content-default)}
+.rc-btn.accept{background:var(--content-emphasis);color:var(--surface-0)}
+
+@media (max-width:900px){.request-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){.request-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
-<header class="top">
-  <div class="brand">⬡ BotShield</div>
-  <nav class="nav">
-    <a href="#requests">Friends</a>
-    <a href="#settings">Filters</a>
-    <a href="#about">About</a>
-  </nav>
-  <div class="topright">Dashboard preview</div>
-</header>
-
-<main class="wrap">
-  <section class="welcome">
-    <div>
-      <div class="eyebrow">Your friend requests</div>
-      <h1>Keep the real ones in sight.</h1>
-      <div class="sub">Review incoming requests with extra context.</div>
-    </div>
-    <div class="demo">DEMO MODE · Sample accounts only</div>
-  </section>
-
-  <section class="panel connection">
-    <div class="connection-top">
-      <div>
-        <h2>Roblox account connection</h2>
-        <div class="sub">Status: <strong>Not connected</strong></div>
-      </div>
-      <button class="btn" id="connect">Connect Roblox</button>
-    </div>
-    <div class="note">
-      This is a demo. It does not ask for passwords or session cookies
-      and cannot send actions to Roblox.
-    </div>
-  </section>
-
-  <section class="stats">
-    <div class="stat">
-      <div class="num" id="total">6</div>
-      <div class="label">Requests in this demo</div>
-    </div>
-    <div class="stat">
-      <div class="num" id="genuine">0</div>
-      <div class="label">Likely genuine</div>
-    </div>
-    <div class="stat">
-      <div class="num" id="flagged">0</div>
-      <div class="label">Needs a closer look</div>
-    </div>
-  </section>
-
-  <div class="layout">
-    <section class="panel" id="requests">
-      <div class="panelhead">
-        <h2>Friend requests</h2>
-        <span class="count">Illustrative data</span>
-      </div>
-      <div class="tabs">
-        <button class="tab active" data-tab="all">All requests</button>
-        <button class="tab" data-tab="likely">Likely genuine</button>
-        <button class="tab" data-tab="suspicious">Suspicious</button>
-      </div>
-      <input class="search" id="search"
-        placeholder="Username here" aria-label="Username here">
-      <div id="list"></div>
-    </section>
-
-    <aside class="panel side" id="settings">
-      <h3>Detection settings</h3>
-      <p>Choose which signals contribute to the demo's risk assessment.</p>
-      <div id="settingsList"></div>
-      <div class="note">
-        These are example scoring rules, not verified bot detection.
-        A low friend count does not prove an account is a bot.
-      </div>
-    </aside>
+<div class="topnav">
+  <div class="brand">Friends</div>
+  <div class="cookie-form">
+    <input class="input-field" id="cookieInput" type="password" placeholder="Paste .ROBLOSECURITY cookie">
+    <button class="btn-connect" id="connectBtn">Connect</button>
   </div>
+</div>
 
-  <div class="footer" id="about">
-    BotShield concept preview · Not affiliated with Roblox
-  </div>
-</main>
-
-<div class="toast" id="toast" role="status"></div>
+<div class="content">
+  <div class="friends-title">Friend Requests</div>
+  <div class="status" id="status">Not connected.</div>
+  <div class="request-grid" id="grid"></div>
+</div>
 
 <script>
-const requests = [
-  {id:1,name:'CloudyBuilder',handle:'@cloudy_builds',initials:'CB',friends:84,followers:126,age:'2 years',items:'Mixed avatar items'},
-  {id:2,name:'xX_guest_48391',handle:'@guest48391',initials:'XG',friends:0,followers:1,age:'New',items:'Very similar outfit pattern'},
-  {id:3,name:'MaplePlays',handle:'@mapleplays',initials:'MP',friends:212,followers:340,age:'4 years',items:'Several catalog items'},
-  {id:4,name:'RbxUser_72910',handle:'@rbx72910',initials:'R7',friends:1,followers:0,age:'New',items:'Repeated avatar pattern'},
-  {id:5,name:'PixelPanda',handle:'@pixel_panda',initials:'PP',friends:43,followers:61,age:'1 year',items:'Classic + catalog items'},
-  {id:6,name:'Player_000582',handle:'@player000582',initials:'P5',friends:2,followers:3,age:'New',items:'Limited public info'}
-];
+const PROXY = '/api/proxy';
+let myCookie = '';
 
-const settings = [
-  ['avatar','Avatar similarity','Repeated outfit patterns'],
-  ['friends','Friend count','Very low friend counts'],
-  ['followers','Follower count','Very low follower counts'],
-  ['age','Account age','New account signal'],
-  ['items','Avatar items','Catalog item information']
-];
+async function roblox(path) {
+  const res = await fetch(`${PROXY}?path=${encodeURIComponent(path)}`, {
+    headers: { 'X-Roblox-Cookie': myCookie }
+  });
+  if (!res.ok) throw new Error('Roblox API error ' + res.status);
+  return res.json();
+}
 
-let enabled = {
-  avatar:true, friends:true, followers:true, age:true, items:true
+document.getElementById('connectBtn').onclick = async () => {
+  myCookie = document.getElementById('cookieInput').value.trim();
+  if (!myCookie) return alert('Paste your cookie first');
+  document.getElementById('status').textContent = 'Loading...';
+
+  try {
+    const data = await roblox('friends.roblox.com/v1/my/friends/requests');
+    const list = data.data || [];
+    document.getElementById('status').textContent = list.length + ' pending request(s)';
+    await render(list);
+  } catch (e) {
+    document.getElementById('status').textContent = 'Error: ' + e.message;
+  }
 };
-let activeTab = 'all';
 
-function score(r) {
-  let s = 0;
-  if (enabled.avatar && /similar|Repeated/.test(r.items)) s += 35;
-  if (enabled.friends && r.friends < 3) s += 20;
-  if (enabled.followers && r.followers < 5) s += 15;
-  if (enabled.age && r.age === 'New') s += 15;
-  if (enabled.items && r.items === 'Limited public info') s += 10;
-  return Math.min(100,s);
-}
+async function render(list) {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
 
-function category(r) {
-  return score(r) >= 50 ? 'suspicious' : 'likely';
-}
+  for (const req of list) {
+    let assetCount = 0;
+    try {
+      const av = await roblox(`avatar.roblox.com/v1/users/${req.id}/currently-wearing`);
+      assetCount = (av.assets || []).length;
+    } catch {}
 
-function toast(message) {
-  const el = document.getElementById('toast');
-  el.textContent = message;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2400);
-}
-
-function renderSettings() {
-  document.getElementById('settingsList').innerHTML =
-    settings.map(([key,name,description]) => `
-      <div class="setting">
-        <div>
-          <span>${name}</span>
-          <small>${description}</small>
+    const card = document.createElement('div');
+    card.className = 'request-card';
+    card.innerHTML = `
+      <div class="rc-top">
+        <img class="rc-avatar" src="https://www.roblox.com/headshot-thumbnail/image?userId=${req.id}&width=150&height=150&format=png" alt="">
+        <div class="rc-names">
+          <span class="rc-display">${req.displayName || req.name}</span>
+          <span class="rc-user">@${req.name}</span>
+          <div class="rc-wearing">${assetCount} item(s) worn${assetCount < 3 ? ' · likely bot' : ''}</div>
         </div>
-        <button class="toggle ${enabled[key]?'on':''}"
-          data-setting="${key}"
-          aria-label="Toggle ${name}"
-          aria-pressed="${enabled[key]}"></button>
       </div>
-    `).join('');
+      <div class="rc-actions">
+        <button class="rc-btn ignore">Ignore</button>
+        <button class="rc-btn accept">Accept</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  }
 }
-
-function render() {
-  const query = document.getElementById('search').value.toLowerCase();
-
-  const shown = requests.filter(r =>
-    r.name.toLowerCase().includes(query) &&
-    (activeTab === 'all' || category(r) === activeTab)
-  );
-
-  document.getElementById('total').textContent = requests.length;
-  document.getElementById('genuine').textContent =
-    requests.filter(r => category(r) === 'likely').length;
-  document.getElementById('flagged').textContent =
-    requests.filter(r => category(r) === 'suspicious').length;
-
-  document.getElementById('list').innerHTML = shown.length
-    ? shown.map(r => {
-        const c = category(r);
-        return `
-          <div class="request">
-            <div class="avatar">${r.initials}</div>
-            <div class="person">
-              <strong>${r.name}</strong>
-              <div class="handle">${r.handle}</div>
-              <div class="meta">
-                ${r.friends} friends · ${r.followers} followers ·
-                ${r.age} · ${r.items}
-              </div>
-            </div>
-            <span class="pill ${c}">
-              ${c === 'likely' ? 'Likely genuine' : 'Suspicious'}
-            </span>
-            <div class="actions">
-              <button class="btn accept"
-                data-action="accept" data-id="${r.id}">✓ Accept</button>
-              <button class="btn decline"
-                data-action="decline" data-id="${r.id}">✕ Decline</button>
-            </div>
-          </div>
-        `;
-      }).join('')
-    : '<div class="empty">No requests in this view.</div>';
-}
-
-document.addEventListener('click', e => {
-  const button = e.target.closest('button');
-  if (!button) return;
-
-  if (button.dataset.tab) {
-    activeTab = button.dataset.tab;
-    document.querySelectorAll('.tab').forEach(tab =>
-      tab.classList.toggle('active', tab === button)
-    );
-    render();
-  }
-
-  if (button.dataset.setting) {
-    const key = button.dataset.setting;
-    enabled[key] = !enabled[key];
-    renderSettings();
-    render();
-  }
-
-  if (button.dataset.action) {
-    const index = requests.findIndex(
-      r => r.id === Number(button.dataset.id)
-    );
-
-    if (index >= 0) {
-      const [request] = requests.splice(index, 1);
-      toast(`${request.name}: ${button.dataset.action} in this demo only. No Roblox action was sent.`);
-      render();
-    }
-  }
-});
-
-document.getElementById('search').addEventListener('input', render);
-
-document.getElementById('connect').addEventListener('click', () => {
-  toast('Live Roblox connection is not available in this demo.');
-});
-
-renderSettings();
-render();
 </script>
 </body>
 </html>
