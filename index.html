@@ -176,10 +176,11 @@ let allRequests = [];
 let currentFilter = 'all';
 
 // ==========================================
-// BOT ITEM BLOCKLIST (Names and IDs)
+// BOT BUNDLE IDs
 // ==========================================
-const KNOWN_BOT_ITEM_IDS = ["1772336109"]; 
-const KNOWN_BOT_ITEM_NAMES = ["down to earth hair", "bacon", "default"]; 
+const KNOWN_BOT_BUNDLES = [
+  "1772336109" // Down to Earth Hair Bundle
+]; 
 
 async function roblox(path) {
   const res = await fetch(`${PROXY}?path=${encodeURIComponent(path)}`, {
@@ -187,32 +188,6 @@ async function roblox(path) {
   });
   if (!res.ok) throw new Error('Roblox API error ' + res.status);
   return res.json();
-}
-
-// Fetch the names of the items to see if they match the blocklist
-async function checkItemNames(assetIds) {
-    for (const id of assetIds) {
-        if (KNOWN_BOT_ITEM_IDS.includes(String(id))) return true;
-
-        try {
-            // Use the proxy to avoid CORS errors
-            const path = `assetdelivery.roblox.com/v1/asset?id=${id}`;
-            const res = await fetch(`${PROXY}?path=${encodeURIComponent(path)}`, {
-                headers: { 'X-Roblox-Cookie': myCookie }
-            });
-            if (!res.ok) continue;
-            
-            const text = await res.text();
-            const match = text.match(/<string name="Name">([^<]+)<\/string>/);
-            if (match) {
-                const itemName = match[1].toLowerCase();
-                if (KNOWN_BOT_ITEM_NAMES.some(botName => itemName.includes(botName))) {
-                    return true;
-                }
-            }
-        } catch { }
-    }
-    return false;
 }
 
 document.getElementById('connectBtn').onclick = async () => {
@@ -228,7 +203,7 @@ document.getElementById('connectBtn').onclick = async () => {
     allRequests = [];
     for (const req of list) {
       const userId = req.sender?.userId || req.requester?.id || req.id;
-      let userData = { id: userId, username: 'Unknown', displayName: 'Unknown', assetIds: [], age: 999, avatarUrl: '', isBot: false };
+      let userData = { id: userId, username: 'Unknown', displayName: 'Unknown', assetIds: [], bundleIds: [], age: 999, avatarUrl: '', isBot: false };
       
       if (userId) {
         try {
@@ -239,8 +214,10 @@ document.getElementById('connectBtn').onclick = async () => {
         } catch (e) {}
 
         try {
+          // The Avatar Details API returns both assets AND bundles!
           const avDetails = await roblox(`avatar.roblox.com/v1/users/${userId}/avatar`);
           if (avDetails.assets) userData.assetIds = avDetails.assets;
+          if (avDetails.bundles) userData.bundleIds = avDetails.bundles.map(b => b.id.toString());
         } catch (e) {}
 
         try {
@@ -249,11 +226,10 @@ document.getElementById('connectBtn').onclick = async () => {
         } catch (e) {}
       }
 
-      // Check names directly
-      const hasBotItem = await checkItemNames(userData.assetIds);
+      // Check if any of the bundles they are wearing match our bot list
+      const hasBotBundle = userData.bundleIds.some(id => KNOWN_BOT_BUNDLES.includes(id));
       
-      // Logic: Has bot item -> Bot. 0 items -> Bot. New account with <3 items -> Bot.
-      userData.isBot = hasBotItem || (userData.assetIds.length === 0) || (userData.age < 7 && userData.assetIds.length < 3);
+      userData.isBot = hasBotBundle || (userData.assetIds.length === 0) || (userData.age < 7 && userData.assetIds.length < 3);
       
       allRequests.push(userData);
     }
@@ -284,8 +260,8 @@ function renderGrid() {
     card.className = 'request-card';
     const finalAvatarUrl = user.avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.id}&width=150&height=150&format=png`;
     
-    let infoText = `${user.assetIds.length} item(s) worn · ${user.age} days old`;
-    if (user.isBot) infoText = `Likely Bot · ${user.assetIds.length} items`;
+    let infoText = `${user.assetIds.length + user.bundleIds.length} item(s) worn · ${user.age} days old`;
+    if (user.isBot) infoText = `Likely Bot · ${user.assetIds.length + user.bundleIds.length} items`;
 
     card.innerHTML = `
       <a href="https://www.roblox.com/users/${user.id}/profile" target="_blank" class="rc-top">
