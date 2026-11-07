@@ -9,13 +9,13 @@
   --surface-0:#ffffff; --surface-100:#f7f7f8;
   --content-emphasis:#202227; --content-default:#494d5a; --content-muted:#6a6f81;
   --stroke-default:rgba(27,37,75,.12); --action-standard-bg:rgba(27,37,75,.12);
-  --action-emphasis-bg:#335fff;
+  --action-emphasis-bg:#335fff; --tab-hover-line:#bcbec8;
 }
 :root, :root[data-theme="dark"] {
   --surface-0:#121215; --surface-100:#272930;
   --content-emphasis:#f7f7f8; --content-default:#d5d7dd; --content-muted:#bcbec8;
   --stroke-default:rgba(208,217,251,.12); --action-standard-bg:rgba(208,217,251,.12);
-  --action-emphasis-bg:#335fff;
+  --action-emphasis-bg:#335fff; --tab-hover-line:#494d5a;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Builder Sans",Helvetica,Arial,sans-serif;font-size:12px;
@@ -23,6 +23,7 @@ body{font-family:"Builder Sans",Helvetica,Arial,sans-serif;font-size:12px;
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 a{color:inherit;text-decoration:none}
 
+/* Top bar */
 .topnav{height:44px;background:var(--surface-100);border-bottom:1px solid var(--stroke-default);
   display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:12px}
 .brand{font-size:18px;font-weight:800;flex-shrink:0}
@@ -37,19 +38,75 @@ a{color:inherit;text-decoration:none}
 .friends-title{font-size:24px;font-weight:800;padding:5px 0;margin-bottom:8px}
 .status{margin-bottom:12px;font-size:13px;color:var(--content-muted)}
 
-.request-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;padding: 0 6px;}
+/* ===== Requests Header & Filter Dropdown ===== */
+.requests-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0 12px; flex-wrap: wrap; margin-bottom: 12px;}
+.friends-subtitle h2 { font-size: 16px; font-weight: 700; margin: 0; }
+.requests-actions { display: flex; align-items: center; gap: 8px; }
+.pill-btn { height: 26px; padding: 0 11px; border-radius: 8px; background: var(--action-standard-bg); color: var(--content-emphasis); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.pill-btn:hover:not(:disabled) { filter: brightness(1.1); }
 
+.level-dd { position: relative; }
+.level-btn {
+  display: flex; align-items: center; gap: 6px;
+  height: 26px; padding: 0 8px 0 9px;
+  border-radius: 8px;
+  background: var(--action-standard-bg);
+  color: var(--content-emphasis);
+  font-size: 14px; font-weight: 500;
+  white-space: nowrap;
+}
+.level-btn:hover { filter: brightness(1.1); }
+.level-shield { width: 15px; height: 15px; color: #00b06f; }
+.level-chevron { width: 14px; height: 14px; color: var(--content-muted); transition: transform .15s; }
+.level-btn[aria-expanded="true"] .level-chevron { transform: rotate(180deg); }
+
+.level-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 50;
+  width: 320px; max-width: calc(100vw - 32px);
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--surface-0);
+  border: 1px solid var(--stroke-default);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .22);
+}
+.level-menu[hidden] { display: none; }
+
+.level-opt {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.level-opt.active { background: var(--action-standard-bg); }
+.level-opt-num {
+  flex-shrink: 0; width: 24px; height: 24px; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; background: var(--action-standard-bg);
+  font-size: 13px; font-weight: 700; color: var(--content-default);
+}
+.level-opt[aria-selected="true"] .level-opt-num { background: var(--content-emphasis); color: var(--surface-0); }
+.level-opt-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.level-opt-title { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--content-emphasis); }
+.level-opt-desc { font-size: 12px; line-height: 1.4; color: var(--content-muted); }
+.level-check {
+  flex-shrink: 0; width: 16px; height: 16px; margin-top: 4px;
+  fill: none; stroke: var(--content-emphasis); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  visibility: hidden;
+}
+.level-opt[aria-selected="true"] .level-check { visibility: visible; }
+@media (max-width: 600px) { .level-menu { left: 0; right: auto; } }
+
+/* ===== Request Cards ===== */
+.request-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;padding: 0 6px;}
 .request-card { 
   display: flex; flex-direction: column; padding: 12px 12px 12px;
   background: var(--surface-100); border-radius: 8px;
 }
 .rc-top { display: flex; align-items: flex-start; gap: 12px; min-width: 0; color: inherit; }
-
 .rc-avatar {
   width: 96px; height: 96px; flex-shrink: 0; border-radius: 50%;
   background: var(--action-standard-bg); object-fit: cover;
 }
-
 .rc-names { min-width: 0; padding-top: 6px; }
 .rc-display, .rc-user { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rc-display { font-size: 16px; font-weight: 500; line-height: 1.3; color: var(--content-emphasis); }
@@ -80,7 +137,42 @@ a{color:inherit;text-decoration:none}
 </div>
 
 <div class="content">
-  <div class="friends-title">Friend Requests</div>
+  
+  <!-- Header and Filter Bar -->
+  <div class="requests-header">
+    <div class="friends-subtitle">
+      <h2>Friend Requests</h2>
+    </div>
+    <div class="requests-actions">
+      
+      <!-- FILTER DROPDOWN -->
+      <div class="level-dd">
+        <button class="level-btn" id="filterBtn" aria-expanded="false">
+          <svg class="level-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          Filter: All
+          <svg class="level-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+        
+        <div class="level-menu" id="filterMenu" hidden>
+          <div class="level-opt" data-filter="all" aria-selected="true">
+            <div class="level-opt-body"><div class="level-opt-title">All Requests</div></div>
+            <svg class="level-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="level-opt" data-filter="bot">
+            <div class="level-opt-body"><div class="level-opt-title" style="color:#e2231a;">Likely Bots</div><div class="level-opt-desc">New accounts or wearing known bot items</div></div>
+            <svg class="level-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div class="level-opt" data-filter="real">
+            <div class="level-opt-body"><div class="level-opt-title" style="color:#00a862;">Real Players</div><div class="level-opt-desc">Older accounts with normal avatars</div></div>
+            <svg class="level-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+        </div>
+      </div>
+      <!-- END FILTER -->
+
+    </div>
+  </div>
+
   <div class="status" id="status">Not connected.</div>
   <div class="request-grid" id="grid"></div>
 </div>
@@ -88,6 +180,11 @@ a{color:inherit;text-decoration:none}
 <script>
 const PROXY = '/api/proxy';
 let myCookie = '';
+let allRequests = []; // Store the raw data here
+let currentFilter = 'all';
+
+// ADD BOT ITEM IDs HERE
+const KNOWN_BOT_ITEMS = [1772336109]; 
 
 async function roblox(path) {
   const res = await fetch(`${PROXY}?path=${encodeURIComponent(path)}`, {
@@ -106,67 +203,75 @@ document.getElementById('connectBtn').onclick = async () => {
     const data = await roblox('friends.roblox.com/v1/my/friends/requests');
     const list = data.data || [];
     document.getElementById('status').textContent = list.length + ' pending request(s)';
-    await render(list);
+    
+    // Process all the data first
+    allRequests = [];
+    for (const req of list) {
+      const userId = req.sender?.userId || req.requester?.id || req.id;
+      let userData = { id: userId, username: 'Unknown', displayName: 'Unknown', assetIds: [], age: 999, avatarUrl: '', isBot: false };
+      
+      if (userId) {
+        try {
+          const userInfo = await roblox(`users.roblox.com/v1/users/${userId}`);
+          userData.username = userInfo.name;
+          userData.displayName = userInfo.displayName;
+          userData.age = Math.floor((new Date() - new Date(userInfo.created)) / (1000 * 60 * 60 * 24));
+        } catch (e) {}
+
+        try {
+          const avDetails = await roblox(`avatar.roblox.com/v1/users/${userId}/avatar`);
+          if (avDetails.assets) userData.assetIds = avDetails.assets;
+        } catch (e) {}
+
+        try {
+          const thumbData = await roblox(`thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
+          if (thumbData.data?.[0]?.imageUrl) userData.avatarUrl = thumbData.data[0].imageUrl;
+        } catch (e) {}
+      }
+
+      const hasBotItem = userData.assetIds.some(id => KNOWN_BOT_ITEMS.includes(id));
+      userData.isBot = hasBotItem || (userData.assetIds.length === 0) || (userData.age < 7 && userData.assetIds.length < 3);
+      
+      allRequests.push(userData);
+    }
+
+    renderGrid(); // Draw the grid
   } catch (e) {
     document.getElementById('status').textContent = 'Error: ' + e.message;
   }
 };
 
-async function render(list) {
+// Draw the grid based on the current filter
+function renderGrid() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
-  for (const req of list) {
-    const userId = req.sender?.userId || req.requester?.id || req.id;
-    
-    let username = 'Unknown';
-    let displayName = 'Unknown';
-    let assetCount = 0;
-    let accountAgeDays = 999;
-    let finalAvatarUrl = '';
+  const filteredList = allRequests.filter(u => {
+    if (currentFilter === 'bot') return u.isBot;
+    if (currentFilter === 'real') return !u.isBot;
+    return true; // 'all'
+  });
 
-    if (userId) {
-      // 1. Get Username, Display Name, and Account Age
-      try {
-        const userInfo = await roblox(`users.roblox.com/v1/users/${userId}`);
-        username = userInfo.name;
-        displayName = userInfo.displayName;
-        const created = new Date(userInfo.created);
-        accountAgeDays = Math.floor((new Date() - created) / (1000 * 60 * 60 * 24));
-      } catch (e) {}
+  if (filteredList.length === 0) {
+      grid.innerHTML = `<div style="color:var(--content-muted);grid-column:1/-1;">No requests match this filter.</div>`;
+      return;
+  }
 
-      // 2. Get the exact item count using the Avatar Details API (This never fails)
-      try {
-        const avDetails = await roblox(`avatar.roblox.com/v1/users/${userId}/avatar`);
-        if (avDetails.assets) {
-          assetCount = avDetails.assets.length;
-        }
-      } catch (e) {}
-
-      // 3. Get Circular Headshot
-      try {
-        const thumbData = await roblox(`thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
-        if (thumbData.data?.[0]?.imageUrl) finalAvatarUrl = thumbData.data[0].imageUrl;
-      } catch (e) {}
-    }
-
+  for (const user of filteredList) {
     const card = document.createElement('div');
     card.className = 'request-card';
-    if (!finalAvatarUrl) finalAvatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
+    const finalAvatarUrl = user.avatarUrl || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.id}&width=150&height=150&format=png`;
     
-    // If they have less than 3 items AND are less than 30 days old, flag as bot
-    const isBot = (assetCount < 3 && accountAgeDays < 30);
-    
-    let infoText = `${assetCount} item(s) worn · ${accountAgeDays} days old`;
-    if (isBot) infoText = `Likely Bot · ${assetCount} items · ${accountAgeDays} days old`;
+    let infoText = `${user.assetIds.length} item(s) worn · ${user.age} days old`;
+    if (user.isBot) infoText = `Likely Bot · ${user.assetIds.length} items`;
 
     card.innerHTML = `
-      <a href="https://www.roblox.com/users/${userId}/profile" target="_blank" class="rc-top">
+      <a href="https://www.roblox.com/users/${user.id}/profile" target="_blank" class="rc-top">
         <img class="rc-avatar" src="${finalAvatarUrl}" alt="Avatar">
         <div class="rc-names">
-          <span class="rc-display">${displayName}</span>
-          <span class="rc-user">@${username}</span>
-          <div class="rc-wearing ${isBot ? 'bot' : ''}">
+          <span class="rc-display">${user.displayName}</span>
+          <span class="rc-user">@${user.username}</span>
+          <div class="rc-wearing ${user.isBot ? 'bot' : ''}">
             ${infoText}
           </div>
         </div>
@@ -179,6 +284,45 @@ async function render(list) {
     grid.appendChild(card);
   }
 }
+
+// --- Dropdown Logic ---
+const filterBtn = document.getElementById('filterBtn');
+const filterMenu = document.getElementById('filterMenu');
+
+filterBtn.onclick = () => {
+  const isHidden = filterMenu.hidden;
+  filterMenu.hidden = !isHidden;
+  filterBtn.setAttribute('aria-expanded', isHidden);
+};
+
+document.querySelectorAll('.level-opt').forEach(opt => {
+  opt.onclick = () => {
+    currentFilter = opt.dataset.filter;
+    
+    // Update UI
+    filterBtn.innerHTML = `
+      <svg class="level-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      Filter: ${opt.querySelector('.level-opt-title').textContent}
+      <svg class="level-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+    `;
+
+    document.querySelectorAll('.level-opt').forEach(o => o.setAttribute('aria-selected', 'false'));
+    opt.setAttribute('aria-selected', 'true');
+    
+    filterMenu.hidden = true;
+    filterBtn.setAttribute('aria-expanded', 'false');
+    
+    renderGrid(); // Re-draw the cards
+  };
+});
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+  if (!filterBtn.contains(e.target) && !filterMenu.contains(e.target)) {
+    filterMenu.hidden = true;
+    filterBtn.setAttribute('aria-expanded', 'false');
+  }
+});
 </script>
 </body>
 </html>
