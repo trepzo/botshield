@@ -11,7 +11,7 @@
   --stroke-default:rgba(27,37,75,.12); --action-standard-bg:rgba(27,37,75,.12);
   --action-emphasis-bg:#335fff;
 }
-:root, :root[data-theme="dark"] {
+:root[data-theme="dark"] {
   --surface-0:#121215; --surface-100:#272930;
   --content-emphasis:#f7f7f8; --content-default:#d5d7dd; --content-muted:#bcbec8;
   --stroke-default:rgba(208,217,251,.12); --action-standard-bg:rgba(208,217,251,.12);
@@ -139,8 +139,9 @@ async function render(list) {
     const card = document.createElement('div');
     card.className = 'request-card';
     
-    // Force image request through the proxy so CORS doesn't block it
-    const avatarUrl = `${PROXY}?path=thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}%26size=150x150%26format=Png%26isCircular=true`;
+    // Build the URL to ask our proxy for the Base64 image
+    const thumbPath = `thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`;
+    const avatarUrl = `${PROXY}?path=${encodeURIComponent(thumbPath)}`;
     
     const profileUrl = `https://www.roblox.com/users/${userId}/profile`;
     const isBot = assetCount < 3;
