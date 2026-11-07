@@ -23,7 +23,6 @@ body{font-family:"Builder Sans",Helvetica,Arial,sans-serif;font-size:12px;
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 a{color:inherit;text-decoration:none}
 
-/* Top bar */
 .topnav{height:44px;background:var(--surface-100);border-bottom:1px solid var(--stroke-default);
   display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:12px}
 .brand{font-size:18px;font-weight:800;flex-shrink:0}
@@ -38,12 +37,9 @@ a{color:inherit;text-decoration:none}
 .friends-title{font-size:24px;font-weight:800;padding:5px 0;margin-bottom:8px}
 .status{margin-bottom:12px;font-size:13px;color:var(--content-muted)}
 
-/* ===== Requests Header & Filter Dropdown ===== */
 .requests-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0 12px; flex-wrap: wrap; margin-bottom: 12px;}
 .friends-subtitle h2 { font-size: 16px; font-weight: 700; margin: 0; }
 .requests-actions { display: flex; align-items: center; gap: 8px; }
-.pill-btn { height: 26px; padding: 0 11px; border-radius: 8px; background: var(--action-standard-bg); color: var(--content-emphasis); font-size: 14px; font-weight: 500; white-space: nowrap; }
-.pill-btn:hover:not(:disabled) { filter: brightness(1.1); }
 
 .level-dd { position: relative; }
 .level-btn {
@@ -96,7 +92,6 @@ a{color:inherit;text-decoration:none}
 .level-opt[aria-selected="true"] .level-check { visibility: visible; }
 @media (max-width: 600px) { .level-menu { left: 0; right: auto; } }
 
-/* ===== Request Cards ===== */
 .request-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;padding: 0 6px;}
 .request-card { 
   display: flex; flex-direction: column; padding: 12px 12px 12px;
@@ -138,14 +133,12 @@ a{color:inherit;text-decoration:none}
 
 <div class="content">
   
-  <!-- Header and Filter Bar -->
   <div class="requests-header">
     <div class="friends-subtitle">
       <h2>Friend Requests</h2>
     </div>
     <div class="requests-actions">
       
-      <!-- FILTER DROPDOWN -->
       <div class="level-dd">
         <button class="level-btn" id="filterBtn" aria-expanded="false">
           <svg class="level-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -168,7 +161,6 @@ a{color:inherit;text-decoration:none}
           </div>
         </div>
       </div>
-      <!-- END FILTER -->
 
     </div>
   </div>
@@ -180,11 +172,14 @@ a{color:inherit;text-decoration:none}
 <script>
 const PROXY = '/api/proxy';
 let myCookie = '';
-let allRequests = []; // Store the raw data here
+let allRequests = []; 
 let currentFilter = 'all';
 
-// ADD BOT ITEM IDs HERE
-const KNOWN_BOT_ITEMS = [1772336109]; 
+// ==========================================
+// BOT ITEM BLOCKLIST (Names and IDs)
+// ==========================================
+const KNOWN_BOT_ITEM_IDS = ["1772336109"]; 
+const KNOWN_BOT_ITEM_NAMES = ["down to earth hair", "bacon", "default"]; 
 
 async function roblox(path) {
   const res = await fetch(`${PROXY}?path=${encodeURIComponent(path)}`, {
@@ -192,6 +187,32 @@ async function roblox(path) {
   });
   if (!res.ok) throw new Error('Roblox API error ' + res.status);
   return res.json();
+}
+
+// Fetch the names of the items to see if they match the blocklist
+async function checkItemNames(assetIds) {
+    for (const id of assetIds) {
+        if (KNOWN_BOT_ITEM_IDS.includes(String(id))) return true;
+
+        try {
+            // Use the proxy to avoid CORS errors
+            const path = `assetdelivery.roblox.com/v1/asset?id=${id}`;
+            const res = await fetch(`${PROXY}?path=${encodeURIComponent(path)}`, {
+                headers: { 'X-Roblox-Cookie': myCookie }
+            });
+            if (!res.ok) continue;
+            
+            const text = await res.text();
+            const match = text.match(/<string name="Name">([^<]+)<\/string>/);
+            if (match) {
+                const itemName = match[1].toLowerCase();
+                if (KNOWN_BOT_ITEM_NAMES.some(botName => itemName.includes(botName))) {
+                    return true;
+                }
+            }
+        } catch { }
+    }
+    return false;
 }
 
 document.getElementById('connectBtn').onclick = async () => {
@@ -204,7 +225,6 @@ document.getElementById('connectBtn').onclick = async () => {
     const list = data.data || [];
     document.getElementById('status').textContent = list.length + ' pending request(s)';
     
-    // Process all the data first
     allRequests = [];
     for (const req of list) {
       const userId = req.sender?.userId || req.requester?.id || req.id;
@@ -229,19 +249,21 @@ document.getElementById('connectBtn').onclick = async () => {
         } catch (e) {}
       }
 
-      const hasBotItem = userData.assetIds.some(id => KNOWN_BOT_ITEMS.includes(id));
+      // Check names directly
+      const hasBotItem = await checkItemNames(userData.assetIds);
+      
+      // Logic: Has bot item -> Bot. 0 items -> Bot. New account with <3 items -> Bot.
       userData.isBot = hasBotItem || (userData.assetIds.length === 0) || (userData.age < 7 && userData.assetIds.length < 3);
       
       allRequests.push(userData);
     }
 
-    renderGrid(); // Draw the grid
+    renderGrid(); 
   } catch (e) {
     document.getElementById('status').textContent = 'Error: ' + e.message;
   }
 };
 
-// Draw the grid based on the current filter
 function renderGrid() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
@@ -249,7 +271,7 @@ function renderGrid() {
   const filteredList = allRequests.filter(u => {
     if (currentFilter === 'bot') return u.isBot;
     if (currentFilter === 'real') return !u.isBot;
-    return true; // 'all'
+    return true;
   });
 
   if (filteredList.length === 0) {
@@ -285,7 +307,6 @@ function renderGrid() {
   }
 }
 
-// --- Dropdown Logic ---
 const filterBtn = document.getElementById('filterBtn');
 const filterMenu = document.getElementById('filterMenu');
 
@@ -299,7 +320,6 @@ document.querySelectorAll('.level-opt').forEach(opt => {
   opt.onclick = () => {
     currentFilter = opt.dataset.filter;
     
-    // Update UI
     filterBtn.innerHTML = `
       <svg class="level-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
       Filter: ${opt.querySelector('.level-opt-title').textContent}
@@ -312,11 +332,10 @@ document.querySelectorAll('.level-opt').forEach(opt => {
     filterMenu.hidden = true;
     filterBtn.setAttribute('aria-expanded', 'false');
     
-    renderGrid(); // Re-draw the cards
+    renderGrid(); 
   };
 });
 
-// Close menu when clicking outside
 document.addEventListener('click', (e) => {
   if (!filterBtn.contains(e.target) && !filterMenu.contains(e.target)) {
     filterMenu.hidden = true;
