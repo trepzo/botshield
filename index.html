@@ -127,7 +127,11 @@ async function getItemDetails(assetIds) {
     body: JSON.stringify({ items: items })
   });
   
-  if (!res.ok) return [];
+  if (!res.ok) {
+    console.error("Catalog API failed:", res.status);
+    return [];
+  }
+  
   const data = await res.json();
   return data.data || [];
 }
@@ -164,12 +168,19 @@ async function render(list) {
       if (assetIds.length > 0) {
         try {
           const details = await getItemDetails(assetIds);
-          details.forEach(item => {
-            if (item.name) itemNames.push(item.name);
-            const price = item.lowestResalePrice || item.price || 0;
-            totalRobux += price;
-          });
-        } catch (e) { console.error("Could not fetch item details", e); }
+          
+          // Check if details actually loaded
+          if (details.length > 0) {
+             details.forEach(item => {
+               if (item.name) itemNames.push(item.name);
+               const price = item.lowestResalePrice || item.price || 0;
+               totalRobux += price;
+             });
+          } else {
+             // Fallback if catalog fails, just count the IDs we found
+             itemNames = new Array(assetIds.length).fill("Unknown Item");
+          }
+        } catch (e) { console.error(e); }
       }
 
       try {
@@ -182,6 +193,7 @@ async function render(list) {
     card.className = 'request-card';
     if (!finalAvatarUrl) finalAvatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
     
+    // Bot logic: Check account age, item count, and Robux value
     const isBot = (itemNames.length < 3 && accountAgeDays < 30 && totalRobux < 50);
     
     let infoText = `${itemNames.length} item(s) · ${totalRobux} R$ · ${accountAgeDays} days old`;
