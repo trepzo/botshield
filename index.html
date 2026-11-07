@@ -45,8 +45,9 @@ a{color:inherit;text-decoration:none}
 }
 .rc-top { display: flex; align-items: flex-start; gap: 12px; min-width: 0; color: inherit; }
 
+/* Updated to a rectangle for the full body render */
 .rc-avatar {
-  width: 96px; height: 96px; flex-shrink: 0; border-radius: 50%;
+  width: 100px; height: 140px; flex-shrink: 0; border-radius: 8px;
   background: var(--action-standard-bg); object-fit: cover;
 }
 
@@ -112,30 +113,6 @@ document.getElementById('connectBtn').onclick = async () => {
   }
 };
 
-// Fetch item names and prices from Catalog API
-async function getItemDetails(assetIds) {
-  if (!assetIds || assetIds.length === 0) return [];
-  
-  const items = assetIds.map(id => ({ itemType: "Asset", id: id }));
-  
-  const res = await fetch(`${PROXY}?path=${encodeURIComponent('catalog.roblox.com/v1/catalog/items/details')}`, {
-    method: 'POST',
-    headers: { 
-      'X-Roblox-Cookie': myCookie,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ items: items })
-  });
-  
-  if (!res.ok) {
-    console.error("Catalog API failed:", res.status);
-    return [];
-  }
-  
-  const data = await res.json();
-  return data.data || [];
-}
-
 async function render(list) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
@@ -147,8 +124,6 @@ async function render(list) {
     let displayName = 'Unknown';
     let accountAgeDays = 999;
     let finalAvatarUrl = '';
-    let totalRobux = 0;
-    let itemNames = [];
 
     if (userId) {
       try {
@@ -159,32 +134,9 @@ async function render(list) {
         accountAgeDays = Math.floor((new Date() - created) / (1000 * 60 * 60 * 24));
       } catch (e) {}
 
-      let assetIds = [];
       try {
-        const av = await roblox(`avatar.roblox.com/v1/users/${userId}/currently-wearing`);
-        assetIds = av.assets || [];
-      } catch (e) {}
-
-      if (assetIds.length > 0) {
-        try {
-          const details = await getItemDetails(assetIds);
-          
-          // Check if details actually loaded
-          if (details.length > 0) {
-             details.forEach(item => {
-               if (item.name) itemNames.push(item.name);
-               const price = item.lowestResalePrice || item.price || 0;
-               totalRobux += price;
-             });
-          } else {
-             // Fallback if catalog fails, just count the IDs we found
-             itemNames = new Array(assetIds.length).fill("Unknown Item");
-          }
-        } catch (e) { console.error(e); }
-      }
-
-      try {
-        const thumbData = await roblox(`thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
+        // Get the FULL BODY 3D render instead of just the head
+        const thumbData = await roblox(`thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=352x352&format=Png&isCircular=false`);
         if (thumbData.data?.[0]?.imageUrl) finalAvatarUrl = thumbData.data[0].imageUrl;
       } catch (e) {}
     }
@@ -193,11 +145,11 @@ async function render(list) {
     card.className = 'request-card';
     if (!finalAvatarUrl) finalAvatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
     
-    // Bot logic: Check account age, item count, and Robux value
-    const isBot = (itemNames.length < 3 && accountAgeDays < 30 && totalRobux < 50);
+    // If the account is less than 30 days old, it's almost certainly a bot
+    const isBot = accountAgeDays < 30;
     
-    let infoText = `${itemNames.length} item(s) · ${totalRobux} R$ · ${accountAgeDays} days old`;
-    if (isBot) infoText = `Likely Bot (New + Cheap) · ${totalRobux} R$`;
+    let infoText = `${accountAgeDays} days old`;
+    if (isBot) infoText = `Likely Bot · Created ${accountAgeDays} days ago`;
 
     card.innerHTML = `
       <a href="https://www.roblox.com/users/${userId}/profile" target="_blank" class="rc-top">
@@ -205,7 +157,7 @@ async function render(list) {
         <div class="rc-names">
           <span class="rc-display">${displayName}</span>
           <span class="rc-user">@${username}</span>
-          <div class="rc-wearing ${isBot ? 'bot' : ''}" title="${itemNames.join(', ')}">
+          <div class="rc-wearing ${isBot ? 'bot' : ''}">
             ${infoText}
           </div>
         </div>
