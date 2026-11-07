@@ -112,6 +112,26 @@ document.getElementById('connectBtn').onclick = async () => {
   }
 };
 
+// Fetch item names and prices from Catalog API
+async function getItemDetails(assetIds) {
+  if (!assetIds || assetIds.length === 0) return [];
+  
+  const items = assetIds.map(id => ({ itemType: "Asset", id: id }));
+  
+  const res = await fetch(`${PROXY}?path=${encodeURIComponent('catalog.roblox.com/v1/catalog/items/details')}`, {
+    method: 'POST',
+    headers: { 
+      'X-Roblox-Cookie': myCookie,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ items: items })
+  });
+  
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.data || [];
+}
+
 async function render(list) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
@@ -121,51 +141,60 @@ async function render(list) {
     
     let username = 'Unknown';
     let displayName = 'Unknown';
-    let assetCount = 0;
-    let finalAvatarUrl = ''; // We will extract the real image URL into this
+    let accountAgeDays = 999;
+    let finalAvatarUrl = '';
+    let totalRobux = 0;
+    let itemNames = [];
 
     if (userId) {
       try {
         const userInfo = await roblox(`users.roblox.com/v1/users/${userId}`);
         username = userInfo.name;
         displayName = userInfo.displayName;
+        const created = new Date(userInfo.created);
+        accountAgeDays = Math.floor((new Date() - created) / (1000 * 60 * 60 * 24));
       } catch (e) {}
 
+      let assetIds = [];
       try {
         const av = await roblox(`avatar.roblox.com/v1/users/${userId}/currently-wearing`);
-        assetCount = (av.assets || []).length;
+        assetIds = av.assets || [];
       } catch (e) {}
 
+      if (assetIds.length > 0) {
+        try {
+          const details = await getItemDetails(assetIds);
+          details.forEach(item => {
+            if (item.name) itemNames.push(item.name);
+            const price = item.lowestResalePrice || item.price || 0;
+            totalRobux += price;
+          });
+        } catch (e) { console.error("Could not fetch item details", e); }
+      }
+
       try {
-        // 1. Fetch the JSON text response from Roblox
         const thumbData = await roblox(`thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
-        
-        // 2. Extract the actual image URL from inside the JSON
-        if (thumbData.data && thumbData.data[0] && thumbData.data[0].imageUrl) {
-          finalAvatarUrl = thumbData.data[0].imageUrl;
-        }
+        if (thumbData.data?.[0]?.imageUrl) finalAvatarUrl = thumbData.data[0].imageUrl;
       } catch (e) {}
     }
 
     const card = document.createElement('div');
     card.className = 'request-card';
+    if (!finalAvatarUrl) finalAvatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
     
-    // Fallback in case the image URL is missing
-    if (!finalAvatarUrl) {
-       finalAvatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
-    }
-
-    const profileUrl = `https://www.roblox.com/users/${userId}/profile`;
-    const isBot = assetCount < 3;
+    const isBot = (itemNames.length < 3 && accountAgeDays < 30 && totalRobux < 50);
+    
+    let infoText = `${itemNames.length} item(s) · ${totalRobux} R$ · ${accountAgeDays} days old`;
+    if (isBot) infoText = `Likely Bot (New + Cheap) · ${totalRobux} R$`;
 
     card.innerHTML = `
-      <a href="${profileUrl}" target="_blank" class="rc-top">
+      <a href="https://www.roblox.com/users/${userId}/profile" target="_blank" class="rc-top">
         <img class="rc-avatar" src="${finalAvatarUrl}" alt="Avatar">
         <div class="rc-names">
           <span class="rc-display">${displayName}</span>
           <span class="rc-user">@${username}</span>
-          <div class="rc-wearing ${isBot ? 'bot' : ''}">
-            ${assetCount} item(s) worn ${isBot ? '· likely bot' : ''}
+          <div class="rc-wearing ${isBot ? 'bot' : ''}" title="${itemNames.join(', ')}">
+            ${infoText}
           </div>
         </div>
       </a>
