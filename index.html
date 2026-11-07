@@ -104,20 +104,29 @@ async function render(list) {
   grid.innerHTML = '';
 
   for (const req of list) {
-    // 1. Figure out where Roblox put the user data
-    const user = req.requester || req.incomingRequest || req;
-    const userId = user.id || user.userId || req.id;
-    const username = user.name || user.username || 'Unknown';
-    const displayName = user.displayName || username;
-
-    // 2. Check avatar items
+    // Find the User ID. Roblox changed the API so it's usually inside "sender"
+    const userId = req.sender?.userId || req.requester?.id || req.id;
+    
+    let username = 'Unknown';
+    let displayName = 'Unknown';
     let assetCount = 0;
-    try {
-      const av = await roblox(`avatar.roblox.com/v1/users/${userId}/currently-wearing`);
-      assetCount = (av.assets || []).length;
-    } catch {}
 
-    // 3. Create the card
+    if (userId) {
+      // Fetch exact username and display name from Roblox User API
+      try {
+        const userInfo = await roblox(`users.roblox.com/v1/users/${userId}`);
+        username = userInfo.name;
+        displayName = userInfo.displayName;
+      } catch (e) { console.error("Could not load user info", e); }
+
+      // Fetch what they are wearing
+      try {
+        const av = await roblox(`avatar.roblox.com/v1/users/${userId}/currently-wearing`);
+        assetCount = (av.assets || []).length;
+      } catch (e) { console.error("Could not load avatar items", e); }
+    }
+
+    // Create the card
     const card = document.createElement('div');
     card.className = 'request-card';
     card.innerHTML = `
