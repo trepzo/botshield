@@ -11,7 +11,7 @@
   --stroke-default:rgba(27,37,75,.12); --action-standard-bg:rgba(27,37,75,.12);
   --action-emphasis-bg:#335fff;
 }
-:root[data-theme="dark"] {
+:root, :root[data-theme="dark"] {
   --surface-0:#121215; --surface-100:#272930;
   --content-emphasis:#f7f7f8; --content-default:#d5d7dd; --content-muted:#bcbec8;
   --stroke-default:rgba(208,217,251,.12); --action-standard-bg:rgba(208,217,251,.12);
@@ -21,6 +21,7 @@
 body{font-family:"Builder Sans",Helvetica,Arial,sans-serif;font-size:12px;
   background:var(--surface-0);color:var(--content-emphasis);-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
 
 .topnav{height:44px;background:var(--surface-100);border-bottom:1px solid var(--stroke-default);
   display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:12px}
@@ -36,25 +37,37 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .friends-title{font-size:24px;font-weight:800;padding:5px 0;margin-bottom:8px}
 .status{margin-bottom:12px;font-size:13px;color:var(--content-muted)}
 
-.request-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.request-card{display:flex;flex-direction:column;padding:12px;background:var(--surface-100)}
-.rc-top{display:flex;align-items:flex-start;gap:12px;min-width:0}
-.rc-avatar{width:96px;height:96px;flex-shrink:0;border-radius:50%;
-  background:var(--action-standard-bg);object-fit:cover}
-.rc-names{min-width:0;padding-top:6px}
-.rc-display{display:block;font-size:16px;font-weight:500;line-height:1.3;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rc-user{display:block;font-size:12px;line-height:1.6;color:var(--content-default);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rc-wearing{margin-top:6px;font-size:11px;color:var(--content-muted)}
-.rc-actions{display:flex;gap:12px;margin-top:14px}
-.rc-btn{flex:1;height:35px;border-radius:6px;font-size:16px;font-weight:500}
-.rc-btn.ignore{background:transparent;color:var(--content-muted);
-  box-shadow:inset 0 0 0 1px var(--content-default)}
-.rc-btn.accept{background:var(--content-emphasis);color:var(--surface-0)}
+.request-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;padding: 0 6px;}
 
-@media (max-width:900px){.request-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:600px){.request-grid{grid-template-columns:1fr}}
+.request-card { 
+  display: flex; flex-direction: column; padding: 12px 12px 12px;
+  background: var(--surface-100); border-radius: 8px;
+}
+.rc-top { display: flex; align-items: flex-start; gap: 12px; min-width: 0; color: inherit; }
+
+.rc-avatar {
+  width: 96px; height: 96px; flex-shrink: 0; border-radius: 50%;
+  background: var(--action-standard-bg); object-fit: cover;
+}
+
+.rc-names { min-width: 0; padding-top: 6px; }
+.rc-display, .rc-user { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rc-display { font-size: 16px; font-weight: 500; line-height: 1.3; color: var(--content-emphasis); }
+.rc-user { font-size: 12px; line-height: 1.6; color: var(--content-default); }
+.rc-top:hover .rc-display { text-decoration: underline; }
+
+.rc-wearing { margin-top: 6px; font-size: 11px; color: var(--content-muted); }
+.rc-wearing.bot { color: #e2231a; font-weight: 600; }
+
+.rc-actions { display: flex; gap: 12px; margin-top: 24px; padding: 0 6px; }
+.rc-btn { flex: 1; height: 35px; border-radius: 6px; font-size: 16px; font-weight: 500; }
+.rc-btn.ignore { background: transparent; color: var(--content-muted); box-shadow: inset 0 0 0 1px var(--content-default); }
+.rc-btn.ignore:hover { color: var(--content-emphasis); box-shadow: inset 0 0 0 1px var(--content-emphasis); }
+.rc-btn.accept { background: var(--content-emphasis); color: var(--surface-0); }
+.rc-btn.accept:hover { opacity: .88; }
+
+@media (max-width: 900px) { .request-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .request-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -104,7 +117,6 @@ async function render(list) {
   grid.innerHTML = '';
 
   for (const req of list) {
-    // Find the User ID. Roblox changed the API so it's usually inside "sender"
     const userId = req.sender?.userId || req.requester?.id || req.id;
     
     let username = 'Unknown';
@@ -112,32 +124,38 @@ async function render(list) {
     let assetCount = 0;
 
     if (userId) {
-      // Fetch exact username and display name from Roblox User API
       try {
         const userInfo = await roblox(`users.roblox.com/v1/users/${userId}`);
         username = userInfo.name;
         displayName = userInfo.displayName;
-      } catch (e) { console.error("Could not load user info", e); }
+      } catch (e) {}
 
-      // Fetch what they are wearing
       try {
         const av = await roblox(`avatar.roblox.com/v1/users/${userId}/currently-wearing`);
         assetCount = (av.assets || []).length;
-      } catch (e) { console.error("Could not load avatar items", e); }
+      } catch (e) {}
     }
 
-    // Create the card
     const card = document.createElement('div');
     card.className = 'request-card';
+    
+    // Force image request through the proxy so CORS doesn't block it
+    const avatarUrl = `${PROXY}?path=thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}%26size=150x150%26format=Png%26isCircular=true`;
+    
+    const profileUrl = `https://www.roblox.com/users/${userId}/profile`;
+    const isBot = assetCount < 3;
+
     card.innerHTML = `
-      <div class="rc-top">
-        <img class="rc-avatar" src="https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true" alt="">
+      <a href="${profileUrl}" target="_blank" class="rc-top">
+        <img class="rc-avatar" src="${avatarUrl}" alt="Avatar">
         <div class="rc-names">
           <span class="rc-display">${displayName}</span>
           <span class="rc-user">@${username}</span>
-          <div class="rc-wearing">${assetCount} item(s) worn${assetCount < 3 ? ' · likely bot' : ''}</div>
+          <div class="rc-wearing ${isBot ? 'bot' : ''}">
+            ${assetCount} item(s) worn ${isBot ? '· likely bot' : ''}
+          </div>
         </div>
-      </div>
+      </a>
       <div class="rc-actions">
         <button class="rc-btn ignore">Ignore</button>
         <button class="rc-btn accept">Accept</button>
