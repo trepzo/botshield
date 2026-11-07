@@ -11,7 +11,7 @@
   --stroke-default:rgba(27,37,75,.12); --action-standard-bg:rgba(27,37,75,.12);
   --action-emphasis-bg:#335fff;
 }
-:root[data-theme="dark"] {
+:root, :root[data-theme="dark"] {
   --surface-0:#121215; --surface-100:#272930;
   --content-emphasis:#f7f7f8; --content-default:#d5d7dd; --content-muted:#bcbec8;
   --stroke-default:rgba(208,217,251,.12); --action-standard-bg:rgba(208,217,251,.12);
@@ -122,6 +122,7 @@ async function render(list) {
     let username = 'Unknown';
     let displayName = 'Unknown';
     let assetCount = 0;
+    let finalAvatarUrl = ''; // We will extract the real image URL into this
 
     if (userId) {
       try {
@@ -134,21 +135,32 @@ async function render(list) {
         const av = await roblox(`avatar.roblox.com/v1/users/${userId}/currently-wearing`);
         assetCount = (av.assets || []).length;
       } catch (e) {}
+
+      try {
+        // 1. Fetch the JSON text response from Roblox
+        const thumbData = await roblox(`thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
+        
+        // 2. Extract the actual image URL from inside the JSON
+        if (thumbData.data && thumbData.data[0] && thumbData.data[0].imageUrl) {
+          finalAvatarUrl = thumbData.data[0].imageUrl;
+        }
+      } catch (e) {}
     }
 
     const card = document.createElement('div');
     card.className = 'request-card';
     
-    // Build the URL to ask our proxy for the Base64 image
-    const thumbPath = `thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`;
-    const avatarUrl = `${PROXY}?path=${encodeURIComponent(thumbPath)}`;
-    
+    // Fallback in case the image URL is missing
+    if (!finalAvatarUrl) {
+       finalAvatarUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
+    }
+
     const profileUrl = `https://www.roblox.com/users/${userId}/profile`;
     const isBot = assetCount < 3;
 
     card.innerHTML = `
       <a href="${profileUrl}" target="_blank" class="rc-top">
-        <img class="rc-avatar" src="${avatarUrl}" alt="Avatar">
+        <img class="rc-avatar" src="${finalAvatarUrl}" alt="Avatar">
         <div class="rc-names">
           <span class="rc-display">${displayName}</span>
           <span class="rc-user">@${username}</span>
