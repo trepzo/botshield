@@ -104,20 +104,28 @@ async function render(list) {
   grid.innerHTML = '';
 
   for (const req of list) {
+    // 1. Figure out where Roblox put the user data
+    const user = req.requester || req.incomingRequest || req;
+    const userId = user.id || user.userId || req.id;
+    const username = user.name || user.username || 'Unknown';
+    const displayName = user.displayName || username;
+
+    // 2. Check avatar items
     let assetCount = 0;
     try {
-      const av = await roblox(`avatar.roblox.com/v1/users/${req.id}/currently-wearing`);
+      const av = await roblox(`avatar.roblox.com/v1/users/${userId}/currently-wearing`);
       assetCount = (av.assets || []).length;
     } catch {}
 
+    // 3. Create the card
     const card = document.createElement('div');
     card.className = 'request-card';
     card.innerHTML = `
       <div class="rc-top">
-        <img class="rc-avatar" src="https://www.roblox.com/headshot-thumbnail/image?userId=${req.id}&width=150&height=150&format=png" alt="">
+        <img class="rc-avatar" src="https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true" alt="">
         <div class="rc-names">
-          <span class="rc-display">${req.displayName || req.name}</span>
-          <span class="rc-user">@${req.name}</span>
+          <span class="rc-display">${displayName}</span>
+          <span class="rc-user">@${username}</span>
           <div class="rc-wearing">${assetCount} item(s) worn${assetCount < 3 ? ' · likely bot' : ''}</div>
         </div>
       </div>
